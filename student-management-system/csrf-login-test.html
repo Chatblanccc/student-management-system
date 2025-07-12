@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSRF Token登录测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CSRF Token 登录测试</h1>
+        <p>这个页面演示如何正确获取和使用CSRF Token进行登录验证。</p>
+        
+        <div class="form-group">
+            <button onclick="getCSRFToken()">1. 获取 CSRF Token</button>
+            <button onclick="testLogin()">2. 测试登录</button>
+            <button onclick="clearResult()">清除结果</button>
+        </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">用户名:</label>
+                <input type="text" id="username" value="admin" />
+            </div>
+            <div class="form-group">
+                <label for="password">密码:</label>
+                <input type="password" id="password" value="admin123" />
+            </div>
+        </form>
+        
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        let csrfToken = null;
+        const API_BASE = 'http://localhost:8000/api/student_data';
+        
+        function showResult(message, type = 'info') {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = message;
+            resultDiv.className = `result ${type}`;
+            resultDiv.style.display = 'block';
+        }
+        
+        function clearResult() {
+            document.getElementById('result').style.display = 'none';
+        }
+        
+        // 步骤1：获取CSRF Token
+        async function getCSRFToken() {
+            try {
+                showResult('正在获取 CSRF Token...', 'info');
+                
+                const response = await fetch(`${API_BASE}/csrf-token/`, {
+                    method: 'GET',
+                    credentials: 'include', // 重要：包含cookies
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    csrfToken = data.csrfToken;
+                    
+                    showResult(`✅ CSRF Token 获取成功！\n\nToken: ${csrfToken}\n\n现在可以进行登录测试了。`, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                showResult(`❌ 获取 CSRF Token 失败：\n${error.message}`, 'error');
+            }
+        }
+        
+        // 步骤2：使用CSRF Token进行登录
+        async function testLogin() {
+            if (!csrfToken) {
+                showResult('❌ 请先获取 CSRF Token！', 'error');
+                return;
+            }
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showResult('❌ 请输入用户名和密码！', 'error');
+                return;
+            }
+            
+            try {
+                showResult('正在登录...', 'info');
+                
+                const response = await fetch(`${API_BASE}/auth/login/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken, // 重要：在请求头中包含CSRF token
+                    },
+                    credentials: 'include', // 重要：包含cookies
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+                
+                const responseText = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    data = { error: responseText };
+                }
+                
+                if (response.ok) {
+                    showResult(`🎉 登录成功！\n\n用户信息：\n${JSON.stringify(data.user, null, 2)}\n\nJWT Token: ${data.token.substring(0, 50)}...`, 'success');
+                } else {
+                    showResult(`❌ 登录失败 (${response.status})：\n${JSON.stringify(data, null, 2)}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ 登录请求失败：\n${error.message}`, 'error');
+            }
+        }
+        
+        // 页面加载时自动获取CSRF Token
+        window.onload = function() {
+            showResult('页面已加载，点击"获取 CSRF Token"开始测试。', 'info');
+        };
+    </script>
+</body>
+</html> 

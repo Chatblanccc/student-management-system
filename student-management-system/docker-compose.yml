@@ -1,0 +1,87 @@
+services:
+  # MySQL数据库服务 - 使用官方镜像
+  db:
+    image: mysql:8.0
+    container_name: student_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: DataSystem
+      MYSQL_ROOT_PASSWORD: 1997yx0912
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - student_network
+
+  # Redis缓存服务 - 使用官方镜像
+  redis:
+    image: redis:7-alpine
+    container_name: student_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - student_network
+
+  # Django后端服务
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: student_backend
+    restart: unless-stopped
+    environment:
+      - DEBUG=True
+      - DATABASE_HOST=db
+      - DATABASE_PASSWORD=1997yx0912
+      - SECRET_KEY=django-secret-key-for-student-management
+      - ALLOWED_HOSTS=localhost,127.0.0.1,backend,frontend
+      - DJANGO_SETTINGS_MODULE=config.production_settings
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/media:/app/media
+      - ./backend/staticfiles:/app/staticfiles
+    depends_on:
+      - db
+    networks:
+      - student_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Vue前端服务
+  frontend:
+    build: 
+      context: ./vue
+      dockerfile: Dockerfile
+    container_name: student_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - student_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  student_network:
+    driver: bridge 

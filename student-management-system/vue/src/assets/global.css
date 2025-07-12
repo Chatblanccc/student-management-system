@@ -1,0 +1,136 @@
+body {
+    margin: 0px;
+    padding: 0px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+html {
+    font-size: 14px;
+}
+
+.el-button {
+    padding: 8px 15px !important;
+    font-size: 13px !important;
+}
+
+.el-input {
+    font-size: 13px !important;
+}
+
+.el-input__inner {
+    height: 32px !important;
+    line-height: 32px !important;
+    font-size: 13px !important;
+}
+
+.el-select {
+    font-size: 13px !important;
+}
+
+.el-table {
+    font-size: 13px !important;
+}
+
+.el-table th {
+    padding: 8px 0 !important;
+    font-size: 13px !important;
+}
+
+.el-table td {
+    padding: 8px 0 !important;
+    font-size: 13px !important;
+}
+
+.el-form-item__label {
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+}
+
+.el-dialog__header {
+    padding: 15px 20px 10px !important;
+}
+
+.el-dialog__body {
+    padding: 15px 20px !important;
+    font-size: 13px !important;
+}
+
+.el-menu-item {
+    font-size: 13px !important;
+    height: 45px !important;
+    line-height: 45px !important;
+}
+
+.el-sub-menu__title {
+    font-size: 13px !important;
+    height: 45px !important;
+    line-height: 45px !important;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 5px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px;
+    font-size: 13px;
+}
+
+.el-tabs__item {
+    font-size: 13px !important;
+    height: 32px !important;
+    line-height: 32px !important;
+    padding: 0 15px !important;
+}
+
+.el-tabs__content {
+    font-size: 13px !important;
+}
+
+.el-message {
+    font-size: 13px !important;
+    padding: 10px 15px !important;
+}
+
+.el-dropdown-menu__item {
+    font-size: 13px !important;
+    line-height: 32px !important;
+    padding: 0 15px !important;
+}
+
+.el-pagination {
+    font-size: 12px !important;
+}
+
+.el-pagination button {
+    font-size: 12px !important;
+    min-width: 28px !important;
+    height: 28px !important;
+    line-height: 28px !important;
+}
+
+.el-pager li {
+    font-size: 12px !important;
+    min-width: 28px !important;
+    height: 28px !important;
+    line-height: 28px !important;
+}
+
+.vue-devtools__panel {
+    display: none !important;
+}
+
+.vue-devtools__anchor-btn {
+    display: none !important;
+}
+
+
+/* #app {
+    transform: scale(0.9);
+    transform-origin: 0 0;
+    width: 111.11%;
+    height: 111.11%;
+} */
+

@@ -1,0 +1,56 @@
+# Git相关
+.git
+.gitignore
+README.md
+
+# 环境变量和配置
+.env
+.env.*
+
+# IDE和编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 日志文件
+*.log
+logs/
+
+# 临时文件
+tmp/
+temp/
+
+# Node.js (前端)
+vue/node_modules/
+vue/dist/
+vue/.nuxt
+vue/.output
+
+# Python (后端)
+backend/__pycache__/
+backend/*.pyc
+backend/*.pyo
+backend/*.pyd
+backend/.Python
+backend/env/
+backend/venv/
+backend/.venv/
+backend/.cache/
+backend/staticfiles/
+backend/media/
+
+# 数据库
+*.sqlite3
+*.db
+
+# 测试覆盖率
+coverage/
+*.cover
+.coverage
+
+# 部署脚本
+deploy.sh
+deploy.bat
+docker-compose.override.yml 

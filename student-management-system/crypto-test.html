@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 密码加密对比测试</title>
+    <style>
+        body { 
+            font-family: 'Microsoft YaHei', Arial, sans-serif; 
+            max-width: 900px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .test-section { 
+            margin: 20px 0; 
+            padding: 20px; 
+            border: 2px solid #ddd; 
+            border-radius: 12px;
+            position: relative;
+        }
+        .encrypted { 
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0fff0 100%);
+            border-color: #4CAF50;
+        }
+        .plaintext { 
+            background: linear-gradient(135deg, #ffe8e8 0%, #fff0f0 100%);
+            border-color: #f44336;
+        }
+        .badge {
+            position: absolute;
+            top: -10px;
+            right: 15px;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        .safe-badge { background: #4CAF50; }
+        .danger-badge { background: #f44336; }
+        
+        button { 
+            margin: 10px 5px; 
+            padding: 12px 24px; 
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-primary { background: #2196F3; color: white; }
+        .btn-success { background: #4CAF50; color: white; }
+        .btn-warning { background: #FF9800; color: white; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        
+        pre { 
+            background: #f5f5f5; 
+            padding: 15px; 
+            border-radius: 8px; 
+            overflow-x: auto;
+            border-left: 4px solid #2196F3;
+            margin: 10px 0;
+        }
+        .success { color: #4CAF50; font-weight: bold; }
+        .error { color: #f44336; font-weight: bold; }
+        .info { color: #2196F3; }
+        
+        h1 { color: #333; text-align: center; margin-bottom: 30px; }
+        h3 { margin-top: 0; }
+        .desc { color: #666; margin-bottom: 15px; }
+        
+        #result { 
+            max-height: 400px; 
+            overflow-y: auto; 
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        
+        .highlight {
+            background: #ffeb3b;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 密码加密安全对比测试</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">
+            此页面演示Network面板中密码的显示差异，<strong>打开F12开发者工具的Network选项卡查看效果</strong>
+        </p>
+
+        <div class="test-section plaintext">
+            <span class="badge danger-badge">❌ 不安全</span>
+            <h3>明文密码请求</h3>
+            <p class="desc">
+                在Network面板中会明文显示：<span class="highlight">{"username":"admin","password":"admin123"}</span>
+            </p>
+            <button class="btn-warning" onclick="testPlaintextLogin()">发送明文密码请求</button>
+            <p style="font-size: 12px; color: #999;">⚠️ 任何人都能在Network面板中看到真实密码</p>
+        </div>
+
+        <div class="test-section encrypted">
+            <span class="badge safe-badge">✅ 安全</span>
+            <h3>加密密码请求</h3>
+            <p class="desc">
+                在Network面板中只显示加密数据，无法直接看到原始密码
+            </p>
+            <button class="btn-success" onclick="testEncryptedLogin()">发送加密密码请求</button>
+            <p style="font-size: 12px; color: #666;">🔐 密码已加密，每次加密结果都不同</p>
+        </div>
+
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="btn-primary" onclick="clearResult()">清除测试结果</button>
+        </div>
+
+        <div id="result" style="display: none;">
+            <div style="padding: 15px; background: #f0f0f0; border-bottom: 1px solid #ddd; font-weight: bold;">
+                测试结果
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        
+        // 加密函数（与前端保持一致）
+        function encryptPassword(password) {
+            const SECRET_KEY = 'jnua-student-system-2024-secure-key-!@#';
+            const iv = CryptoJS.lib.WordArray.random(16);
+            
+            const encrypted = CryptoJS.AES.encrypt(password, SECRET_KEY, {
+                iv: iv,
+                mode: CryptoJS.mode.CBC,
+                padding: CryptoJS.pad.Pkcs7
+            });
+            
+            return {
+                encryptedPassword: encrypted.toString(),
+                iv: iv.toString(),
+                timestamp: Date.now()
+            };
+        }
+
+        // 明文密码登录测试
+        async function testPlaintextLogin() {
+            showResult('🚨 发送明文密码请求...（危险：密码可见）', 'error');
+            
+            try {
+                const response = await fetch(`${API_BASE}/student_data/auth/login/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        username: 'admin',
+                        password: 'admin123'  // ❌ 明文密码
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('⚠️ 明文密码登录成功！但是密码在Network面板中完全可见', 'error');
+                    showResult('👀 请打开F12 > Network选项卡查看请求详情', 'info');
+                } else {
+                    showResult(`❌ 明文密码登录失败: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ 请求失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 加密密码登录测试
+        async function testEncryptedLogin() {
+            showResult('🔐 发送加密密码请求...（安全：密码已加密）', 'success');
+            
+            try {
+                const encryptedData = encryptPassword('admin123');
+                
+                showResult(`🔑 加密数据预览:\n• 加密密码: ${encryptedData.encryptedPassword.substring(0, 30)}...\n• IV: ${encryptedData.iv}\n• 时间戳: ${encryptedData.timestamp}`, 'info');
+                
+                const response = await fetch(`${API_BASE}/student_data/auth/login/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        username: 'admin',
+                        encryptedPassword: encryptedData.encryptedPassword,  // ✅ 加密密码
+                        iv: encryptedData.iv,
+                        timestamp: encryptedData.timestamp,
+                        isEncrypted: true
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('🎉 加密密码登录成功！Network面板中看不到原始密码', 'success');
+                    showResult('🔍 请打开F12 > Network选项卡，对比两次请求的差异', 'info');
+                } else {
+                    showResult(`❌ 加密密码登录失败: ${data.error}`, 'error');
+                }
+                
+            } catch (error) {
+                showResult(`❌ 请求失败: ${error.message}`, 'error');
+            }
+        }
+
+        function showResult(message, type) {
+            const result = document.getElementById('result');
+            result.style.display = 'block';
+            
+            const time = new Date().toLocaleTimeString();
+            result.innerHTML += `<pre class="${type}">[${time}] ${message}</pre>`;
+            result.scrollTop = result.scrollHeight;
+        }
+        
+        function clearResult() {
+            const result = document.getElementById('result');
+            result.innerHTML = '<div style="padding: 15px; background: #f0f0f0; border-bottom: 1px solid #ddd; font-weight: bold;">测试结果</div>';
+            result.style.display = 'none';
+        }
+
+        // 页面加载完成提示
+        window.onload = function() {
+            console.log('🔐 密码加密测试页面已加载');
+            console.log('📋 使用说明：');
+            console.log('1. 打开F12开发者工具');
+            console.log('2. 切换到Network选项卡');
+            console.log('3. 分别点击两个按钮测试');
+            console.log('4. 观察Network面板中请求数据的差异');
+        }
+    </script>
+</body>
+</html> 
