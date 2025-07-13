@@ -15,14 +15,12 @@
       <div class="login-header">
         <div class="logo-container">
           <div class="logo-circle">
-            <el-icon size="50" color="#ffffff">
-              <School />
-            </el-icon>
+            <img src="/logo_login.png" alt="Logo" class="logo-image">
           </div>
           <div class="logo-glow"></div>
         </div>
         <h1 class="system-title">Jnua学籍管理系统</h1>
-        <p class="welcome-text">Welcome to Student Management System</p>
+        <!-- 删除了 welcome-text -->
         <div class="title-underline"></div>
       </div>
       
@@ -35,11 +33,14 @@
       >
         <el-form-item prop="username" class="form-item-custom">
           <div class="input-container">
+            <label class="input-label">
+              <el-icon class="label-icon"><User /></el-icon>
+              用户名
+            </label>
             <el-input
               v-model="loginForm.username"
               placeholder="请输入用户名"
-              prefix-icon="User"
-              size="large"
+              size="default"
               clearable
               class="custom-input"
             />
@@ -48,12 +49,15 @@
         
         <el-form-item prop="password" class="form-item-custom">
           <div class="input-container">
+            <label class="input-label">
+              <el-icon class="label-icon"><Lock /></el-icon>
+              密码
+            </label>
             <el-input
               v-model="loginForm.password"
               type="password"
               placeholder="请输入密码"
-              prefix-icon="Lock"
-              size="large"
+              size="default"
               show-password
               class="custom-input"
               @keyup.enter="handleLogin"
@@ -75,7 +79,7 @@
         <el-form-item>
           <el-button 
             type="primary" 
-            size="large" 
+            size="default" 
             class="login-button"
             :loading="loading"
             @click="handleLogin"
@@ -99,7 +103,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { School, User, Lock } from '@element-plus/icons-vue'
+import { User, Lock } from '@element-plus/icons-vue'
 import { login } from '@/api/auth'
 import { useUserStore } from '@/utils/userStore'
 
@@ -233,40 +237,40 @@ onMounted(() => {
 }
 
 .shape-1 {
-  width: 80px;
-  height: 80px;
+  width: 60px; /* 缩小 */
+  height: 60px;
   top: 20%;
   left: 10%;
   animation-delay: 0s;
 }
 
 .shape-2 {
-  width: 60px;
-  height: 60px;
+  width: 45px; /* 缩小 */
+  height: 45px;
   top: 60%;
   left: 80%;
   animation-delay: 2s;
 }
 
 .shape-3 {
-  width: 120px;
-  height: 120px;
+  width: 90px; /* 缩小 */
+  height: 90px;
   top: 80%;
   left: 20%;
   animation-delay: 4s;
 }
 
 .shape-4 {
-  width: 40px;
-  height: 40px;
+  width: 30px; /* 缩小 */
+  height: 30px;
   top: 10%;
   left: 70%;
   animation-delay: 1s;
 }
 
 .shape-5 {
-  width: 100px;
-  height: 100px;
+  width: 75px; /* 缩小 */
+  height: 75px;
   top: 40%;
   left: 5%;
   animation-delay: 3s;
@@ -274,19 +278,19 @@ onMounted(() => {
 
 @keyframes float {
   0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(180deg); }
+  50% { transform: translateY(-15px) rotate(180deg); } /* 减少浮动距离 */
 }
 
-/* 登录卡片 */
+/* 登录卡片 - 调整为更紧凑的尺寸 */
 .login-card {
   width: 100%;
-  max-width: 450px;
+  max-width: 420px; /* 减小宽度 */
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border-radius: 24px;
-  padding: 50px 40px;
+  border-radius: 20px; /* 减小圆角 */
+  padding: 35px 35px; /* 减少内边距 */
   box-shadow: 
-    0 25px 50px rgba(0, 0, 0, 0.15),
+    0 20px 40px rgba(0, 0, 0, 0.12), /* 减小阴影 */
     0 0 0 1px rgba(255, 255, 255, 0.2);
   position: relative;
   z-index: 2;
@@ -296,7 +300,7 @@ onMounted(() => {
 @keyframes cardSlideIn {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(20px); /* 减少移动距离 */
   }
   to {
     opacity: 1;
@@ -304,42 +308,51 @@ onMounted(() => {
   }
 }
 
-/* 标题区域 */
+/* 标题区域 - 更紧凑 */
 .login-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 25px; /* 减少间距 */
 }
 
 .logo-container {
   position: relative;
   display: inline-block;
-  margin-bottom: 25px;
+  margin-bottom: 15px; /* 减少间距 */
 }
 
 .logo-circle {
-  width: 90px;
-  height: 90px;
+  width: 65px; /* 缩小Logo */
+  height: 65px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3); /* 减小阴影 */
   animation: logoFloat 3s ease-in-out infinite;
+  overflow: hidden; /* 确保图片不会溢出圆形容器 */
+}
+
+/* 🎨 新增：Logo图片样式 */
+.logo-image {
+  width: 45px; /* 调整图片大小 */
+  height: 45px;
+  object-fit: contain; /* 保持图片比例 */
+  filter: brightness(0) invert(1); /* 将图片转为白色 */
 }
 
 @keyframes logoFloat {
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
+  50% { transform: translateY(-3px); } /* 减少浮动距离 */
 }
 
 .logo-glow {
   position: absolute;
-  top: -5px;
-  left: -5px;
-  right: -5px;
-  bottom: -5px;
+  top: -3px; /* 减小发光效果 */
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 50%;
   opacity: 0.3;
@@ -349,30 +362,23 @@ onMounted(() => {
 
 @keyframes glowPulse {
   0%, 100% { opacity: 0.3; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.05); }
+  50% { opacity: 0.4; transform: scale(1.03); } /* 减小缩放 */
 }
 
 .system-title {
-  font-size: 28px;
+  font-size: 22px; /* 缩小字体 */
   font-weight: 700;
   color: #2c3e50;
-  margin-bottom: 8px;
+  margin-bottom: 12px; /* 减少间距 */
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.welcome-text {
-  color: #7f8c8d;
-  font-size: 14px;
-  margin-bottom: 20px;
-  font-weight: 400;
-}
-
 .title-underline {
-  width: 50px;
-  height: 3px;
+  width: 40px; /* 缩小下划线 */
+  height: 2px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   margin: 0 auto;
   border-radius: 2px;
@@ -380,55 +386,90 @@ onMounted(() => {
 
 /* 表单样式 */
 .login-form {
-  margin-bottom: 30px;
+  margin-bottom: 25px; /* 减少间距 */
 }
 
 .form-item-custom {
-  margin-bottom: 25px;
+  margin-bottom: 20px; /* 减少间距 */
 }
 
 .input-container {
   position: relative;
+  width: 100%;
+}
+
+/* 输入框标签样式 - 更小 */
+.input-label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px; /* 减少间距 */
+  font-size: 13px; /* 缩小字体 */
+  font-weight: 600;
+  color: #4a5568;
+  gap: 5px; /* 减少间距 */
+}
+
+.label-icon {
+  color: #667eea;
+  font-size: 14px; /* 缩小图标 */
+}
+
+/* 🎨 优化后的输入框样式 - 更紧凑 */
+.custom-input {
+  width: 100%;
 }
 
 .custom-input :deep(.el-input__wrapper) {
-  background: rgba(255, 255, 255, 0.8);
-  border: 2px solid rgba(102, 126, 234, 0.2);
-  border-radius: 12px;
-  padding: 12px 16px;
-  transition: all 0.3s ease;
+  width: 100%;
+  background: rgba(248, 250, 252, 0.8);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  border-radius: 10px; /* 缩小圆角 */
+  padding: 12px 16px; /* 减少内边距 */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  min-height: 40px; /* 减少最小高度 */
 }
 
 .custom-input :deep(.el-input__wrapper:hover) {
-  border-color: rgba(102, 126, 234, 0.4);
+  border-color: rgba(102, 126, 234, 0.3);
   background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); /* 减小阴影 */
 }
 
 .custom-input :deep(.el-input__wrapper.is-focus) {
   border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.08); /* 减小聚焦阴影 */
   background: rgba(255, 255, 255, 0.95);
 }
 
 .custom-input :deep(.el-input__inner) {
-  color: #2c3e50;
+  color: #2d3748;
   font-weight: 500;
+  font-size: 14px; /* 缩小字体 */
+  width: 100%;
 }
 
 .custom-input :deep(.el-input__inner::placeholder) {
-  color: #95a5a6;
+  color: #a0aec0;
+  font-weight: 400;
 }
 
-/* 复选框样式 */
+/* 复选框样式 - 改为一行显示 */
 .checkbox-container {
-  margin-bottom: 30px;
+  margin-bottom: 25px; /* 减少间距 */
 }
 
 .checkbox-group {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex-direction: row; /* 🎨 改为横向排列 */
+  justify-content: space-between; /* 🎨 两端对齐 */
+  align-items: center;
+  gap: 15px; /* 🎨 设置合适的间距 */
+}
+
+.custom-checkbox {
+  flex: 1; /* 🎨 让两个复选框平均分配空间 */
 }
 
 .custom-checkbox :deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
@@ -442,18 +483,18 @@ onMounted(() => {
 
 .checkbox-text {
   color: #5a6c7d;
-  font-size: 14px;
+  font-size: 13px; /* 缩小字体 */
   font-weight: 500;
 }
 
-/* 登录按钮 */
+/* 登录按钮 - 更紧凑 */
 .login-button {
   width: 100%;
-  height: 50px;
+  height: 42px; /* 减少高度 */
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
-  border-radius: 12px;
-  font-size: 16px;
+  border-radius: 10px; /* 缩小圆角 */
+  font-size: 14px; /* 缩小字体 */
   font-weight: 600;
   color: white;
   transition: all 0.3s ease;
@@ -477,8 +518,8 @@ onMounted(() => {
 }
 
 .login-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+  transform: translateY(-1px); /* 减少位移 */
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3); /* 减小阴影 */
 }
 
 .login-button:active {
@@ -489,63 +530,76 @@ onMounted(() => {
 .login-footer {
   text-align: center;
   position: relative;
-  padding-top: 25px;
+  padding-top: 20px; /* 减少间距 */
 }
 
 .footer-decoration {
   width: 100%;
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.3), transparent);
-  margin-bottom: 20px;
+  margin-bottom: 15px; /* 减少间距 */
 }
 
 .version-info {
   color: #7f8c8d;
-  font-size: 13px;
-  margin-bottom: 5px;
+  font-size: 12px; /* 缩小字体 */
+  margin-bottom: 4px; /* 减少间距 */
   font-weight: 500;
 }
 
 .copyright {
   color: #bdc3c7;
-  font-size: 12px;
+  font-size: 11px; /* 缩小字体 */
   margin: 0;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
   .login-card {
-    max-width: 350px;
-    padding: 40px 30px;
+    max-width: 340px; /* 调整移动端宽度 */
+    padding: 30px 30px; /* 减少内边距 */
     margin: 0 15px;
   }
   
   .system-title {
-    font-size: 24px;
+    font-size: 20px; /* 缩小字体 */
   }
   
   .logo-circle {
-    width: 70px;
-    height: 70px;
+    width: 55px; /* 缩小Logo */
+    height: 55px;
   }
   
-  .logo-circle .el-icon {
-    font-size: 35px;
+  .logo-image {
+    width: 35px; /* 移动端缩小图片 */
+    height: 35px;
+  }
+  
+  /* 🎨 移动端复选框调整 */
+  .checkbox-group {
+    flex-direction: column; /* 移动端改为垂直排列 */
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .custom-checkbox {
+    flex: none; /* 移动端取消flex */
   }
 }
 
 @media (max-width: 480px) {
   .login-card {
     max-width: 300px;
-    padding: 30px 20px;
+    padding: 25px 20px; /* 减少内边距 */
   }
   
   .system-title {
-    font-size: 22px;
+    font-size: 18px; /* 缩小字体 */
   }
   
-  .checkbox-group {
-    gap: 8px;
+  .logo-image {
+    width: 30px; /* 小屏幕进一步缩小 */
+    height: 30px;
   }
 }
 </style> 
