@@ -16,12 +16,12 @@
       <div style="display: flex; justify-content: right;">
         <!-- 导入按钮 - 仅管理员可见 -->
         <PermissionWrapper permission="import">
-          <el-button type="success" plain @click="DataImportVisible = true">导入数据</el-button>
+          <el-button type="success" plain @click="DataImportVisible = true" style="margin-right: 10px;">导入数据</el-button>
         </PermissionWrapper>
         
         <!-- 导出按钮 - 所有用户可见 -->
         <PermissionWrapper permission="export">
-          <el-button type="primary" plain @click="handleExport">导出数据</el-button>
+          <el-button type="primary" plain @click="handleExport" style="margin-right: 10px;">导出数据</el-button>
         </PermissionWrapper>
         
         <!-- 批量删除按钮 - 仅管理员可见 -->
