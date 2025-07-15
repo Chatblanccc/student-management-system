@@ -595,7 +595,9 @@ class TransferInView(APIView):
             )
 
 class TransferRecordListView(APIView):
-    """获取转学记录列表"""
+    """获取转学记录列表 - 所有认证用户可查看"""
+    permission_classes = [IsAuthenticated]  # 所有登录用户可查看
+    
     def get(self, request):
         page = int(request.GET.get('page', 1))
         page_size = int(request.GET.get('page_size', 20))
@@ -633,7 +635,9 @@ class TransferRecordListView(APIView):
         })
 
 class TransferRecordDetailView(APIView):
-    """获取转学记录详情"""
+    """获取转学记录详情 - 所有认证用户可查看"""
+    permission_classes = [IsAuthenticated]  # 所有登录用户可查看
+    
     def get(self, request, record_id):
         try:
             record = TransferRecord.objects.get(id=record_id)
@@ -719,7 +723,9 @@ class TransferOutView(APIView):
             )
 
 class TransferRecordUpdateView(APIView):
-    """更新转学记录"""
+    """更新转学记录 - 仅管理员"""
+    permission_classes = [IsAdminUser]  # 添加管理员权限
+    
     def put(self, request, record_id):
         try:
             # 获取转学记录
@@ -962,7 +968,8 @@ class DashboardStatsView(APIView):
             }
 
 class StudentSuspendView(APIView):
-    """学生休学处理"""
+    """学生休学处理 - 仅管理员"""
+    permission_classes = [IsAdminUser]  # 添加管理员权限
     
     def post(self, request):
         try:
@@ -1013,7 +1020,8 @@ class StudentSuspendView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class StudentResumeView(APIView):
-    """学生复学处理"""
+    """学生复学处理 - 仅管理员"""
+    permission_classes = [IsAdminUser]  # 添加管理员权限
     
     def post(self, request):
         try:
@@ -1067,7 +1075,8 @@ class StudentResumeView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class SuspendedStudentsView(APIView):
-    """获取休学学生列表"""
+    """获取休学学生列表 - 所有认证用户可查看"""
+    permission_classes = [IsAuthenticated]  # 所有登录用户可查看
     
     def get(self, request):
         try:
