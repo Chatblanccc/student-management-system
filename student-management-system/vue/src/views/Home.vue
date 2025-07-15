@@ -28,7 +28,12 @@
             <el-icon><User /></el-icon>
             管理学生信息
           </el-button>
-          <el-button type="success" size="large" @click="navigateTo('/manage/transfer_process')">
+          <!-- 办理异动按钮 - 仅管理员可见 -->
+          <el-button 
+            v-if="userStore.isAdmin()" 
+            type="success" 
+            size="large" 
+            @click="navigateTo('/manage/transfer_process')">
             <el-icon><Promotion /></el-icon>
             办理异动
           </el-button>

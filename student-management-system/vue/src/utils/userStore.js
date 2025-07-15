@@ -54,14 +54,14 @@ const hasPermission = (permission) => {
   return permissions[permission] || false
 }
 
-// 检查是否为管理员
+// 检查是否为管理员（包括管理员和超级管理员）
 const isAdmin = () => {
-  return permissions.is_admin || state.user?.is_staff || state.user?.is_superuser || false
+  return state.permissions.is_admin || state.user?.is_staff || state.user?.is_superuser
 }
 
-// 检查是否为超级管理员
+// 检查是否为超级管理员  
 const isSuperUser = () => {
-  return permissions.is_superuser || state.user?.is_superuser || false
+  return state.permissions.is_superuser || state.user?.is_superuser
 }
 
 // 检查是否可以管理用户
@@ -229,12 +229,11 @@ export const useUserStore = () => {
     setPermissions,
     logout,
     clearAllStorage,
+    isTokenExpired,
+    initializeStore,
     checkLoginStatus,
-    hasPermission,
-    isAdmin,
-    isSuperUser,
-    canPerform,
-    canManageUsers
+    isAdmin,          // 新增
+    isSuperUser       // 确保存在
   }
 }
 

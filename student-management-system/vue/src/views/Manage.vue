@@ -56,15 +56,21 @@
                         <span>学生信息</span>
                     </el-menu-item>
                     
+                    <!-- 异动情况管理 - 所有用户可见，但子菜单根据权限显示 -->
                     <el-sub-menu index="1" style="border-bottom: 1px solid #ddd;">
                         <template #title>
                             <el-icon><School /></el-icon>
                             <span>异动情况管理</span>
                         </template>
-                        <el-menu-item index="/manage/transfer_process" style="margin-left: -10px;">
+                        <!-- 异动办理 - 仅管理员可见 -->
+                        <el-menu-item 
+                            v-if="userStore.isAdmin()" 
+                            index="/manage/transfer_process" 
+                            style="margin-left: -10px;">
                             <el-icon><Promotion /></el-icon>
                             <span>异动办理</span>
                         </el-menu-item>
+                        <!-- 异动数据详情 - 所有用户可见 -->
                         <el-menu-item index="/manage/transfer_data" style="margin-left: -10px;">
                             <el-icon><Histogram /></el-icon>
                             <span>异动数据详情</span>
