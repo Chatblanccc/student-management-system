@@ -51,7 +51,7 @@ const setPermissions = (userPermissions) => {
 
 // 检查权限的辅助函数
 const hasPermission = (permission) => {
-  return permissions[permission] || false
+  return state.permissions[permission] || false
 }
 
 // 检查是否为管理员（包括管理员和超级管理员）
@@ -66,7 +66,7 @@ const isSuperUser = () => {
 
 // 检查是否可以管理用户
 const canManageUsers = () => {
-  return permissions.can_manage_users || isSuperUser()
+  return state.permissions.can_manage_users || isSuperUser()
 }
 
 // 检查是否可以执行某个操作
@@ -221,7 +221,7 @@ const checkLoginStatus = () => {
 }
 
 // 导出store
-export const useUserStore = () => {
+const useUserStore = () => {
   return {
     state,
     setUser,
@@ -232,8 +232,11 @@ export const useUserStore = () => {
     isTokenExpired,
     initializeStore,
     checkLoginStatus,
-    isAdmin,          // 新增
-    isSuperUser       // 确保存在
+    isAdmin,
+    isSuperUser,
+    canManageUsers,
+    hasPermission,    // 添加
+    canPerform       // 添加 - 这是关键！
   }
 }
 
