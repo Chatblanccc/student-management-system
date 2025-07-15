@@ -1811,3 +1811,194 @@ class UserPermissionsView(APIView):
     def get(self, request):
         permissions = get_user_permissions(request.user)
         return Response(permissions)
+
+from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+from rest_framework.serializers import ModelSerializer
+from .permissions import IsAdminUser, get_user_permissions
+
+# 用户序列化器
+class UserSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_staff', 'is_superuser', 'is_active', 'date_joined', 'last_login']
+        read_only_fields = ['id', 'date_joined', 'last_login']
+
+class UserCreateSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'password', 'email', 'first_name', 'last_name', 'is_staff', 'is_superuser']
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+    
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = User.objects.create_user(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
+
+class UserListView(APIView):
+    """用户列表API - 仅管理员"""
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request):
+        try:
+            users = User.objects.all().order_by('-date_joined')
+            serializer = UserSerializer(users, many=True)
+            return Response({
+                'data': serializer.data,
+                'total': users.count()
+            })
+        except Exception as e:
+            return Response({
+                'error': f'获取用户列表失败: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def post(self, request):
+        """创建新用户"""
+        try:
+            data = request.data.copy()
+            
+            # 处理角色设置
+            role = data.pop('role', 'user')
+            if role == 'admin':
+                data['is_staff'] = True
+                data['is_superuser'] = False
+            elif role == 'superuser':
+                data['is_staff'] = True
+                data['is_superuser'] = True
+            else:
+                data['is_staff'] = False
+                data['is_superuser'] = False
+            
+            # 检查用户名是否已存在
+            if User.objects.filter(username=data.get('username')).exists():
+                return Response({
+                    'error': '用户名已存在'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # 检查邮箱是否已存在（如果提供了邮箱）
+            email = data.get('email')
+            if email and User.objects.filter(email=email).exists():
+                return Response({
+                    'error': '邮箱已存在'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            serializer = UserCreateSerializer(data=data)
+            if serializer.is_valid():
+                user = serializer.save()
+                response_serializer = UserSerializer(user)
+                return Response({
+                    'message': '用户创建成功',
+                    'user': response_serializer.data
+                }, status=status.HTTP_201_CREATED)
+            else:
+                return Response({
+                    'error': '数据验证失败',
+                    'details': serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
+        except Exception as e:
+            return Response({
+                'error': f'创建用户失败: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class UserDetailView(APIView):
+    """用户详情API - 仅管理员"""
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            serializer = UserSerializer(user)
+            return Response(serializer.data)
+        except User.DoesNotExist:
+            return Response({
+                'error': '用户不存在'
+            }, status=status.HTTP_404_NOT_FOUND)
+    
+    def put(self, request, user_id):
+        """更新用户信息"""
+        try:
+            user = User.objects.get(id=user_id)
+            data = request.data.copy()
+            
+            # 处理角色设置
+            role = data.pop('role', None)
+            if role:
+                if role == 'admin':
+                    data['is_staff'] = True
+                    data['is_superuser'] = False
+                elif role == 'superuser':
+                    data['is_staff'] = True
+                    data['is_superuser'] = True
+                else:
+                    data['is_staff'] = False
+                    data['is_superuser'] = False
+            
+            # 如果提供了新密码，更新密码
+            password = data.pop('password', None)
+            
+            serializer = UserSerializer(user, data=data, partial=True)
+            if serializer.is_valid():
+                updated_user = serializer.save()
+                
+                # 如果提供了新密码，单独更新
+                if password:
+                    updated_user.set_password(password)
+                    updated_user.save()
+                
+                response_serializer = UserSerializer(updated_user)
+                return Response({
+                    'message': '用户更新成功',
+                    'user': response_serializer.data
+                })
+            else:
+                return Response({
+                    'error': '数据验证失败',
+                    'details': serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
+        except User.DoesNotExist:
+            return Response({
+                'error': '用户不存在'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'error': f'更新用户失败: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class UserToggleStatusView(APIView):
+    """切换用户状态API - 仅管理员"""
+    permission_classes = [IsAdminUser]
+    
+    def post(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            
+            # 防止管理员禁用自己
+            if user.id == request.user.id:
+                return Response({
+                    'error': '不能禁用自己的账户'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # 切换用户状态
+            user.is_active = not user.is_active
+            user.save()
+            
+            serializer = UserSerializer(user)
+            return Response({
+                'message': f'用户已{"启用" if user.is_active else "禁用"}',
+                'user': serializer.data
+            })
+            
+        except User.DoesNotExist:
+            return Response({
+                'error': '用户不存在'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'error': f'操作失败: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

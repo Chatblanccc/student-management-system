@@ -63,4 +63,9 @@ urlpatterns = [
     
     # 权限相关接口
     path('auth/permissions/', views.UserPermissionsView.as_view(), name='user_permissions'),
+    
+    # 用户管理相关接口
+    path('users/', views.UserListView.as_view(), name='user_list'),
+    path('users/<int:user_id>/', views.UserDetailView.as_view(), name='user_detail'),
+    path('users/<int:user_id>/toggle-status/', views.UserToggleStatusView.as_view(), name='user_toggle_status'),
 ]
