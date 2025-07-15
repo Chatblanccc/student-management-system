@@ -38,7 +38,7 @@
             <el-card class="stat-card">
               <div class="stat-content">
                 <div class="stat-icon admin">
-                  <el-icon><Crown /></el-icon>
+                  <el-icon><Star /></el-icon>  <!-- 替换 Crown 为 Star -->
                 </div>
                 <div class="stat-info">
                   <div class="stat-number">{{ adminCount }}</div>
@@ -337,7 +337,7 @@ import {
   Plus, 
   User, 
   UserFilled,
-  Crown,
+  Star,  // 替换 Crown 为 Star
   Edit, 
   Lock, 
   Unlock,
