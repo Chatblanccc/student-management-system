@@ -102,7 +102,7 @@
           <template #default="{ height, width }">
             <el-table-v2
               :columns="tableColumns"
-              :data="gradeList"
+              :data="sortedGradeList"
               :width="width"
               :height="height - 60"
               :row-height="50"
@@ -308,7 +308,83 @@ const importForm = reactive({
   file: null
 })
 
-// 表格列配置
+// 排序状态
+const sortState = reactive({
+  sortBy: '',
+  sortOrder: ''
+})
+
+// 排序后的数据
+const sortedGradeList = computed(() => {
+  if (!sortState.sortBy || !sortState.sortOrder) {
+    return gradeList.value
+  }
+  
+  const sorted = [...gradeList.value].sort((a, b) => {
+    let result = 0
+    
+    if (sortState.sortBy === 'class_name') {
+      const aVal = a.class_name || ''
+      const bVal = b.class_name || ''
+      result = aVal.localeCompare(bVal, 'zh-CN')
+    } else if (sortState.sortBy === 'total_score') {
+      const aVal = a.total_score || 0
+      const bVal = b.total_score || 0
+      result = bVal - aVal // 默认降序
+    } else if (sortState.sortBy === 'total_rank_in_grade') {
+      const aVal = a.total_rank_in_grade || Number.MAX_SAFE_INTEGER
+      const bVal = b.total_rank_in_grade || Number.MAX_SAFE_INTEGER
+      result = aVal - bVal // 升序排列，排名小的在前
+    } else if (sortState.sortBy.startsWith('subject_')) {
+      // 解析科目代码
+      const parts = sortState.sortBy.split('_')
+      const subjectCode = parts[1]
+      const type = parts[2] // 'score' 或 'rank'
+      
+      if (type === 'score') {
+        const aVal = a.subjects?.[subjectCode]?.score || 0
+        const bVal = b.subjects?.[subjectCode]?.score || 0
+        result = bVal - aVal // 降序排列，分数高的在前
+      } else if (type === 'rank') {
+        const aVal = a.subjects?.[subjectCode]?.rank_in_class || Number.MAX_SAFE_INTEGER
+        const bVal = b.subjects?.[subjectCode]?.rank_in_class || Number.MAX_SAFE_INTEGER
+        result = aVal - bVal // 升序排列，排名小的在前
+      }
+    }
+    
+    return sortState.sortOrder === 'asc' ? result : -result
+  })
+  
+  return sorted
+})
+
+// 处理排序
+const handleSort = (sortBy) => {
+  if (sortState.sortBy === sortBy) {
+    // 如果是同一列，切换排序方向
+    if (sortState.sortOrder === 'asc') {
+      sortState.sortOrder = 'desc'
+    } else if (sortState.sortOrder === 'desc') {
+      // 取消排序
+      sortState.sortBy = ''
+      sortState.sortOrder = ''
+    } else {
+      sortState.sortOrder = 'asc'
+    }
+  } else {
+    // 新列排序
+    sortState.sortBy = sortBy
+    sortState.sortOrder = 'asc'
+  }
+}
+
+// 获取排序图标
+const getSortIcon = (column) => {
+  if (sortState.sortBy !== column) return ''
+  return sortState.sortOrder === 'asc' ? '↑' : '↓'
+}
+
+// 表格列配置 - 修改版本，添加排序功能
 const tableColumns = computed(() => {
   const columns = [
     // 学号列
@@ -352,12 +428,29 @@ const tableColumns = computed(() => {
       }
     },
     
-    // 班级列
+    // 班级列 - 可排序
     {
       key: 'class_name',
       title: '班级',
       width: 80,
       align: 'center',
+      headerCellRenderer: () => {
+        return h('div', {
+          style: { 
+            cursor: 'pointer', 
+            userSelect: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          },
+          onClick: () => handleSort('class_name')
+        }, [
+          h('span', {}, '班级'),
+          h('span', {
+            style: { marginLeft: '4px', color: '#409eff' }
+          }, getSortIcon('class_name'))
+        ])
+      },
       cellRenderer: ({ rowData }) => {
         return h('span', {
           style: { color: '#606266' }
@@ -366,14 +459,31 @@ const tableColumns = computed(() => {
     }
   ]
   
-  // 动态添加科目列
+  // 动态添加科目列 - 可排序
   subjectList.value.forEach(subject => {
-    // 科目分数列
+    // 科目分数列 - 可排序
     columns.push({
       key: `subject_${subject.code}_score`,
       title: subject.name,
       width: 100,
       align: 'center',
+      headerCellRenderer: () => {
+        return h('div', {
+          style: { 
+            cursor: 'pointer', 
+            userSelect: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          },
+          onClick: () => handleSort(`subject_${subject.code}_score`)
+        }, [
+          h('span', {}, subject.name),
+          h('span', {
+            style: { marginLeft: '4px', color: '#409eff' }
+          }, getSortIcon(`subject_${subject.code}_score`))
+        ])
+      },
       cellRenderer: ({ rowData }) => {
         const score = rowData.subjects?.[subject.code]?.score
         if (score !== undefined && score !== null) {
@@ -387,12 +497,29 @@ const tableColumns = computed(() => {
       }
     })
     
-    // 科目排名列
+    // 科目排名列 - 可排序
     columns.push({
       key: `subject_${subject.code}_rank`,
       title: `${subject.name}排名`,
       width: 90,
       align: 'center',
+      headerCellRenderer: () => {
+        return h('div', {
+          style: { 
+            cursor: 'pointer', 
+            userSelect: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          },
+          onClick: () => handleSort(`subject_${subject.code}_rank`)
+        }, [
+          h('span', {}, `${subject.name}排名`),
+          h('span', {
+            style: { marginLeft: '4px', color: '#409eff' }
+          }, getSortIcon(`subject_${subject.code}_rank`))
+        ])
+      },
       cellRenderer: ({ rowData }) => {
         const rank = rowData.subjects?.[subject.code]?.rank_in_class
         if (rank) {
@@ -407,13 +534,30 @@ const tableColumns = computed(() => {
     })
   })
   
-  // 总分列
+  // 总分列 - 可排序
   columns.push({
     key: 'total_score',
     title: '总分',
     width: 100,
     align: 'center',
     fixed: 'right',
+    headerCellRenderer: () => {
+      return h('div', {
+        style: { 
+          cursor: 'pointer', 
+          userSelect: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        },
+        onClick: () => handleSort('total_score')
+      }, [
+        h('span', {}, '总分'),
+        h('span', {
+          style: { marginLeft: '4px', color: '#409eff' }
+        }, getSortIcon('total_score'))
+      ])
+    },
     cellRenderer: ({ rowData }) => {
       return h('span', {
         style: { fontWeight: '600', color: '#303133' }
@@ -421,13 +565,30 @@ const tableColumns = computed(() => {
     }
   })
   
-  // 总分排名列
+  // 总分排名列 - 可排序
   columns.push({
     key: 'total_rank_in_grade',
     title: '总分排名',
     width: 100,
     align: 'center',
     fixed: 'right',
+    headerCellRenderer: () => {
+      return h('div', {
+        style: { 
+          cursor: 'pointer', 
+          userSelect: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        },
+        onClick: () => handleSort('total_rank_in_grade')
+      }, [
+        h('span', {}, '总分排名'),
+        h('span', {
+          style: { marginLeft: '4px', color: '#409eff' }
+        }, getSortIcon('total_rank_in_grade'))
+      ])
+    },
     cellRenderer: ({ rowData }) => {
       if (rowData.total_rank_in_grade) {
         return h('span', {
@@ -1053,5 +1214,29 @@ onMounted(() => {
   color: #c0c4cc;
   font-style: italic;
   font-size: 12px;
+}
+
+/* 排序列头样式 */
+:deep(.el-table-v2__header-cell) {
+  position: relative;
+}
+
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.sortable-header:hover {
+  color: #409eff;
+}
+
+.sort-icon {
+  margin-left: 4px;
+  color: #409eff;
+  font-weight: bold;
 }
 </style>
