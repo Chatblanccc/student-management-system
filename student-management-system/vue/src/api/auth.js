@@ -55,3 +55,11 @@ export const refreshToken = (refreshToken) => {
     data: { refresh: refreshToken }
   })
 } 
+
+// 获取用户权限API
+export const getUserPermissions = () => {
+  return request({
+    url: '/student_data/auth/permissions/',
+    method: 'get'
+  })
+} 

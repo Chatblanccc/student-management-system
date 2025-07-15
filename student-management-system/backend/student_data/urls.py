@@ -1,5 +1,18 @@
 from django.urls import path
 from . import views
+from rest_framework.permissions import BasePermission
+from rest_framework.response import Response
+from rest_framework import status
+from functools import wraps
+from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import get_user_model
+from .permissions import IsAdminUser, IsReadOnlyUser, admin_required, get_user_permissions
+
+User = get_user_model()
 
 urlpatterns = [
     # 健康检查端点
@@ -47,4 +60,7 @@ urlpatterns = [
     path('grades/matrix/export/', views.GradeMatrixExportView.as_view(), name='grade_matrix_export'),
     path('grades/matrix/template/', views.GradeMatrixTemplateView.as_view(), name='grade_matrix_template'),
     path('grades/matrix/import/', views.GradeMatrixImportView.as_view(), name='grade_matrix_import'),  # 新增
+    
+    # 权限相关接口
+    path('auth/permissions/', views.UserPermissionsView.as_view(), name='user_permissions'),
 ]

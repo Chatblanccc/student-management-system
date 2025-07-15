@@ -1,10 +1,23 @@
 import { reactive } from 'vue'
 
+// 用户权限状态
+const permissions = reactive({
+  can_view: false,
+  can_add: false,
+  can_edit: false,
+  can_delete: false,
+  can_import: false,
+  can_export: false,
+  is_admin: false,
+  user_role: 'user'
+})
+
 // 简单的响应式用户状态管理
 const state = reactive({
   user: null,
   token: null,
-  isLoggedIn: false
+  isLoggedIn: false,
+  permissions: permissions
 })
 
 // 存储类型配置
@@ -81,6 +94,11 @@ const setUser = (user, rememberMe = false) => {
   state.user = user
   state.isLoggedIn = true
   
+  // 设置权限（如果用户数据包含权限信息）
+  if (user.permissions) {
+    setPermissions(user.permissions)
+  }
+  
   // 总是存储到 sessionStorage
   sessionStorage.setItem('user', JSON.stringify(user))
   
@@ -114,6 +132,7 @@ const clearAllStorage = () => {
   state.user = null
   state.token = null
   state.isLoggedIn = false
+  clearPermissions()
   
   // 清除所有存储
   sessionStorage.removeItem('user')
@@ -141,15 +160,64 @@ const checkLoginStatus = () => {
   return state.isLoggedIn
 }
 
+// 设置用户权限
+const setPermissions = (userPermissions) => {
+  Object.assign(permissions, userPermissions)
+  console.log('🔐 权限已更新:', userPermissions)
+}
+
+// 检查权限的辅助函数
+const hasPermission = (permission) => {
+  return permissions[permission] || false
+}
+
+// 检查是否为管理员
+const isAdmin = () => {
+  return permissions.is_admin || false
+}
+
+// 检查是否可以执行某个操作
+const canPerform = (action) => {
+  const actionMap = {
+    'add': 'can_add',
+    'edit': 'can_edit',
+    'delete': 'can_delete',
+    'import': 'can_import',
+    'export': 'can_export',
+    'view': 'can_view'
+  }
+  
+  const permissionKey = actionMap[action]
+  return permissionKey ? hasPermission(permissionKey) : false
+}
+
+// 清除权限信息
+const clearPermissions = () => {
+  Object.assign(permissions, {
+    can_view: false,
+    can_add: false,
+    can_edit: false,
+    can_delete: false,
+    can_import: false,
+    can_export: false,
+    is_admin: false,
+    user_role: 'user'
+  })
+}
+
 // 导出store
 export const useUserStore = () => {
   return {
     state,
     setUser,
     setToken,
+    setPermissions,
     logout,
     clearAllStorage,
-    checkLoginStatus
+    checkLoginStatus,
+    hasPermission,
+    isAdmin,
+    canPerform
   }
 }
 

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/utils/userStore'
+import { getUserInfo, getUserPermissions } from '@/api/auth'
 import { ElMessage } from 'element-plus'
 
 const router = createRouter({
@@ -65,7 +66,7 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   // 设置页面标题
   if (to.meta.title) {
     document.title = to.meta.title
@@ -83,6 +84,32 @@ router.beforeEach((to, from, next) => {
   
   // 已登录用户访问登录页，重定向到首页
   if (to.path === '/login' && isLoggedIn) {
+    next('/manage/home')
+    return
+  }
+  
+  // 如果已登录但没有权限信息，获取权限
+  if (isLoggedIn && !userStore.state.permissions.is_admin && !userStore.state.permissions.can_view) {
+    try {
+      const [userResponse, permissionsResponse] = await Promise.all([
+        getUserInfo(),
+        getUserPermissions()
+      ])
+      
+      userStore.setUser(userResponse.user)
+      userStore.setPermissions(permissionsResponse)
+    } catch (error) {
+      console.error('获取用户权限失败:', error)
+      // 如果获取权限失败，可能是token过期，清除登录状态
+      userStore.clearAllStorage()
+      next('/login')
+      return
+    }
+  }
+  
+  // 检查管理员权限（如果路由需要）
+  if (to.meta.adminOnly && !userStore.isAdmin()) {
+    ElMessage.error('权限不足，需要管理员权限')
     next('/manage/home')
     return
   }

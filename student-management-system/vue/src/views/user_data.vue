@@ -14,11 +14,22 @@
         <el-button type="warning" plain @click="handleReset">重置</el-button>
       </div>
       <div style="display: flex; justify-content: right;">
-        <el-button type="success" plain @click="DataImportVisible = true">导入数据</el-button>
-        <el-button type="primary" plain @click="handleExport">导出数据</el-button>
-        <el-button type="danger" plain @click="handleBatchDelete" :disabled="selectedRows.length === 0">
-          批量删除 {{ selectedRows.length > 0 ? `(${selectedRows.length})` : '' }}
-        </el-button>
+        <!-- 导入按钮 - 仅管理员可见 -->
+        <PermissionWrapper permission="import">
+          <el-button type="success" plain @click="DataImportVisible = true">导入数据</el-button>
+        </PermissionWrapper>
+        
+        <!-- 导出按钮 - 所有用户可见 -->
+        <PermissionWrapper permission="export">
+          <el-button type="primary" plain @click="handleExport">导出数据</el-button>
+        </PermissionWrapper>
+        
+        <!-- 批量删除按钮 - 仅管理员可见 -->
+        <PermissionWrapper permission="delete">
+          <el-button type="danger" plain @click="handleBatchDelete" :disabled="selectedRows.length === 0">
+            批量删除 {{ selectedRows.length > 0 ? `(${selectedRows.length})` : '' }}
+          </el-button>
+        </PermissionWrapper>
       </div>
     </div>
     <!-- 工具栏结束 -->
@@ -575,6 +586,8 @@ import { ElLoading, ElMessage, ElMessageBox, ElButton, ElIcon, ElTag, ElCheckbox
 import { studentAPI } from '@/api/student'
 import { generateStudentTemplate } from '@/utils/excelTemplate'
 import * as XLSX from 'xlsx'
+import PermissionWrapper from '@/components/PermissionWrapper.vue'
+import { useUserStore } from '@/utils/userStore'
 
 // 搜索表单
 const searchForm = reactive({
@@ -888,11 +901,14 @@ const tableColumns = computed(() => [
     fixed: 'right',
     cellRenderer: ({ rowData }) => {
       const isSuspended = rowData.current_status === 'suspended'
+      const userStore = useUserStore()
+      const canEdit = userStore.canPerform('edit')
+      const canDelete = userStore.canPerform('delete')
       
       return h('div', {
         style: { display: 'flex', justifyContent: 'center', gap: '8px' }
       }, [
-        // 查看详情按钮
+        // 查看详情按钮 - 所有用户都可以查看
         h(ElButton, {
           icon: Search,
           circle: true,
@@ -900,8 +916,8 @@ const tableColumns = computed(() => [
           onClick: () => handleViewDetail(rowData)
         }),
         
-        // 编辑按钮
-        h(ElButton, {
+        // 编辑按钮 - 仅管理员可见
+        canEdit && h(ElButton, {
           type: 'primary',
           icon: Edit,
           circle: true,
@@ -910,8 +926,8 @@ const tableColumns = computed(() => [
           onClick: () => handleEdit(rowData)
         }),
         
-        // 删除按钮
-        h(ElButton, {
+        // 删除按钮 - 仅管理员可见
+        canDelete && h(ElButton, {
           type: 'danger',
           icon: Delete,
           circle: true,
@@ -919,7 +935,7 @@ const tableColumns = computed(() => [
           disabled: isSuspended,
           onClick: () => handleSingleDelete(rowData)
         })
-      ])
+      ].filter(Boolean)) // 过滤掉falsy值
     }
   }
 ])

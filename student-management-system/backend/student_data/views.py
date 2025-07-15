@@ -24,6 +24,7 @@ from .crypto import decrypt_password, is_encrypted_request
 
 from .models import Subject, Exam, Grade
 from .serializers import SubjectSerializer, ExamSerializer, GradeSerializer, GradeDetailSerializer
+from .permissions import IsAdminUser, IsReadOnlyUser, admin_required, get_user_permissions
 
 # CSRF Token获取端点
 class CSRFTokenView(APIView):
@@ -127,12 +128,15 @@ class LogoutView(APIView):
                 'error': '登出失败'
             }, status=status.HTTP_400_BAD_REQUEST)
 
+# 在UserInfoView中添加权限信息
 class UserInfoView(APIView):
     """获取用户信息API"""
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
         user = request.user
+        permissions = get_user_permissions(user)
+        
         return Response({
             'user': {
                 'id': user.id,
@@ -142,11 +146,14 @@ class UserInfoView(APIView):
                 'last_name': user.last_name,
                 'is_staff': user.is_staff,
                 'is_superuser': user.is_superuser
-            }
+            },
+            'permissions': permissions
         }, status=status.HTTP_200_OK)
 
 class StudentDataImportView(APIView):
+    """学生数据导入 - 仅管理员"""
     parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAdminUser]
     
     def post(self, request):
         if 'file' not in request.FILES:
@@ -305,7 +312,9 @@ class StudentDataImportView(APIView):
             )
 
 class StudentDataListView(APIView):
-    """学生数据列表视图"""
+    """学生数据列表视图 - 所有用户可查看"""
+    permission_classes = [IsReadOnlyUser]
+    
     def get(self, request):
         try:
             # 获取查询参数
@@ -362,7 +371,9 @@ class ImportLogView(APIView):
         return Response(serializer.data)
 
 class StudentDataDeleteView(APIView):
-    """批量删除学生数据"""
+    """学生数据删除 - 仅管理员"""
+    permission_classes = [IsAdminUser]
+    
     def delete(self, request):
         ids = request.data.get('ids', [])
         
@@ -396,7 +407,9 @@ class StudentDataDeleteView(APIView):
             )
 
 class StudentDataUpdateView(APIView):
-    """更新学生数据"""
+    """学生数据更新 - 仅管理员"""
+    permission_classes = [IsAdminUser]
+    
     def put(self, request, student_id):
         try:
             student = StudentData.objects.get(id=student_id)
@@ -467,7 +480,9 @@ class StudentDataDetailView(APIView):
             )
 
 class TransferInView(APIView):
-    """学生转入处理"""
+    """学生转入处理 - 仅管理员"""
+    permission_classes = [IsAdminUser]
+    
     def post(self, request):
         print(f"收到转入请求数据: {request.data}")
         
@@ -626,7 +641,9 @@ class TransferRecordDetailView(APIView):
             )
 
 class TransferOutView(APIView):
-    """学生转出处理"""
+    """学生转出处理 - 仅管理员"""
+    permission_classes = [IsAdminUser]
+    
     def post(self, request):
         print(f"收到转出请求数据: {request.data}")
         
@@ -1604,8 +1621,9 @@ class GradeMatrixTemplateView(APIView):
                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class GradeMatrixImportView(APIView):
-    """批量导入成绩 - 横向格式"""
+    """成绩导入 - 仅管理员"""
     parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAdminUser]
     
     def post(self, request):
         print(f"收到横向成绩导入请求: {request.data}")
@@ -1784,3 +1802,12 @@ class GradeMatrixImportView(APIView):
             print(f"文件处理错误: {error_msg}")
             return Response({'error': error_msg}, 
                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# 添加权限检查API
+class UserPermissionsView(APIView):
+    """获取用户权限API"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        permissions = get_user_permissions(request.user)
+        return Response(permissions)
