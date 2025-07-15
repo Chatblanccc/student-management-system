@@ -242,3 +242,6 @@ const useUserStore = () => {
 
 // 初始化store
 initializeStore() 
+
+// 添加缺失的导出语句
+export { useUserStore } 
