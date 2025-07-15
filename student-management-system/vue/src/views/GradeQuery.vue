@@ -92,7 +92,6 @@
       <div v-if="!queryForm.exam_id" class="empty-state">
         <el-empty 
           description="请先选择考试查看成绩数据">
-          <el-button type="primary" @click="() => {}">选择考试</el-button>
         </el-empty>
       </div>
       
