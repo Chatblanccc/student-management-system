@@ -24,7 +24,7 @@ from .crypto import decrypt_password, is_encrypted_request
 
 from .models import Subject, Exam, Grade
 from .serializers import SubjectSerializer, ExamSerializer, GradeSerializer, GradeDetailSerializer
-from .permissions import IsAdminUser, IsReadOnlyUser, admin_required, get_user_permissions
+from .permissions import IsAdminUser, IsReadOnlyUser, admin_required, get_user_permissions, IsSuperUser
 
 # CSRF Token获取端点
 class CSRFTokenView(APIView):
@@ -84,6 +84,10 @@ class LoginView(APIView):
                     'error': '账户已被禁用'
                 }, status=status.HTTP_401_UNAUTHORIZED)
 
+            # 🆕 更新最后登录时间
+            user.last_login = timezone.now()
+            user.save(update_fields=['last_login'])
+
             # 生成JWT token
             refresh = RefreshToken.for_user(user)
             access_token = refresh.access_token
@@ -99,7 +103,8 @@ class LoginView(APIView):
                     'first_name': user.first_name,
                     'last_name': user.last_name,
                     'is_staff': user.is_staff,
-                    'is_superuser': user.is_superuser
+                    'is_superuser': user.is_superuser,
+                    'last_login': user.last_login  # 🆕 返回最后登录时间
                 }
             }, status=status.HTTP_200_OK)
 
@@ -1840,8 +1845,8 @@ class UserCreateSerializer(ModelSerializer):
         return user
 
 class UserListView(APIView):
-    """用户列表API - 仅管理员"""
-    permission_classes = [IsAdminUser]
+    """用户列表API - 仅超级管理员"""
+    permission_classes = [IsSuperUser]  # 改为仅超级管理员
     
     def get(self, request):
         try:
@@ -1906,8 +1911,8 @@ class UserListView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class UserDetailView(APIView):
-    """用户详情API - 仅管理员"""
-    permission_classes = [IsAdminUser]
+    """用户详情API - 仅超级管理员"""
+    permission_classes = [IsSuperUser]  # 改为仅超级管理员
     
     def get(self, request, user_id):
         try:
@@ -1971,8 +1976,8 @@ class UserDetailView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class UserToggleStatusView(APIView):
-    """切换用户状态API - 仅管理员"""
-    permission_classes = [IsAdminUser]
+    """切换用户状态API - 仅超级管理员"""
+    permission_classes = [IsSuperUser]  # 改为仅超级管理员
     
     def post(self, request, user_id):
         try:

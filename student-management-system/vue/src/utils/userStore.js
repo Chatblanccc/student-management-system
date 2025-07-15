@@ -59,6 +59,16 @@ const isAdmin = () => {
   return permissions.is_admin || state.user?.is_staff || state.user?.is_superuser || false
 }
 
+// 检查是否为超级管理员
+const isSuperUser = () => {
+  return permissions.is_superuser || state.user?.is_superuser || false
+}
+
+// 检查是否可以管理用户
+const canManageUsers = () => {
+  return permissions.can_manage_users || isSuperUser()
+}
+
 // 检查是否可以执行某个操作
 const canPerform = (action) => {
   const actionMap = {
@@ -222,7 +232,9 @@ export const useUserStore = () => {
     checkLoginStatus,
     hasPermission,
     isAdmin,
-    canPerform
+    isSuperUser,
+    canPerform,
+    canManageUsers
   }
 }
 

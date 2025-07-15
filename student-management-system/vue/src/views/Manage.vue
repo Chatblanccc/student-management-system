@@ -86,9 +86,9 @@
                         </el-menu-item>
                     </el-sub-menu>
 
-                    <!-- 用户管理菜单 - 仅管理员可见 -->
+                    <!-- 用户管理菜单 - 仅超级管理员可见 -->
                     <el-menu-item 
-                        v-if="userStore.isAdmin()" 
+                        v-if="userStore.isSuperUser()" 
                         index="/manage/user_management" 
                         style="border-bottom: 1px solid #ddd;">
                         <el-icon><Setting /></el-icon>

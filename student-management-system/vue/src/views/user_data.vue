@@ -26,7 +26,7 @@
         
         <!-- 批量删除按钮 - 仅管理员可见 -->
         <PermissionWrapper permission="delete">
-          <el-button type="danger" plain @click="handleBatchDelete" :disabled="selectedRows.length === 0">
+          <el-button type="danger" plain @click="handleBatchDelete">
             批量删除 {{ selectedRows.length > 0 ? `(${selectedRows.length})` : '' }}
           </el-button>
         </PermissionWrapper>
