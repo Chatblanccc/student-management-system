@@ -12,13 +12,6 @@ class IsAdminUser(BasePermission):
             request.user.is_superuser or request.user.is_staff
         )
 
-class IsSuperUser(BasePermission):
-    """
-    超级管理员权限检查 - 仅超级管理员
-    """
-    def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated and request.user.is_superuser
-
 class IsReadOnlyUser(BasePermission):
     """
     只读权限检查 - 普通用户只能查看
@@ -27,12 +20,39 @@ class IsReadOnlyUser(BasePermission):
         if not (request.user and request.user.is_authenticated):
             return False
         
-        # 管理员和超级管理员有所有权限
-        if request.user.is_superuser or request.user.is_staff:
+        # 管理员有所有权限
+        if request.user.is_staff or request.user.is_superuser:
             return True
         
-        # 普通用户只能进行GET请求
-        return request.method in ['GET', 'HEAD', 'OPTIONS']
+        # 普通用户只能进行安全的读取操作
+        safe_methods = ['GET', 'HEAD', 'OPTIONS']
+        return request.method in safe_methods
+
+class IsSuperUser(BasePermission):
+    """
+    超级管理员权限检查
+    """
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated and request.user.is_superuser
+
+def admin_required(view_func):
+    """
+    管理员权限装饰器
+    """
+    @wraps(view_func)
+    def wrapper(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response({
+                'error': '请先登录'
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        
+        if not (request.user.is_staff or request.user.is_superuser):
+            return Response({
+                'error': '权限不足，需要管理员权限'
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        return view_func(self, request, *args, **kwargs)
+    return wrapper
 
 def superuser_required(view_func):
     """
