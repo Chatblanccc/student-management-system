@@ -97,97 +97,21 @@
       </div>
       
       <!-- 成绩表格 -->
-      <el-table 
-        v-else
-        :data="gradeList" 
-        style="width: 100%" 
-        stripe
-        border
-        v-loading="tableLoading"
-        class="grade-matrix-table">
-        
-        <!-- 固定列 -->
-        <el-table-column prop="school_id" label="学号" width="120" align="center" fixed="left">
-          <template #default="scope">
-            <span class="school-id">{{ scope.row.school_id }}</span>
+      <div v-else class="virtual-table-container" v-loading="tableLoading">
+        <el-auto-resizer>
+          <template #default="{ height, width }">
+            <el-table-v2
+              :columns="tableColumns"
+              :data="gradeList"
+              :width="width"
+              :height="height - 60"
+              :row-height="50"
+              :header-height="50"
+              fixed
+            />
           </template>
-        </el-table-column>
-        
-        <el-table-column prop="name" label="姓名" width="100" align="center" fixed="left">
-          <template #default="scope">
-            <span class="student-name">{{ scope.row.name }}</span>
-          </template>
-        </el-table-column>
-        
-        <el-table-column prop="grade" label="年级" width="80" align="center">
-          <template #default="scope">
-            <span v-if="scope.row.grade">{{ scope.row.grade }}</span>
-            <span class="no-data" v-else>未设置</span>
-          </template>
-        </el-table-column>
-        
-        <el-table-column prop="class_name" label="班级" width="80" align="center" sortable>
-          <template #default="scope">
-            <span v-if="scope.row.class_name">{{ scope.row.class_name }}</span>
-            <span class="no-data" v-else>未设置</span>
-          </template>
-        </el-table-column>
-        
-        <!-- 动态生成科目列 -->
-        <template v-for="subject in subjectList" :key="subject.code">
-          <el-table-column 
-            :label="subject.name" 
-            width="100" 
-            align="center"
-            sortable
-            :sort-method="(a, b) => sortSubjectScore(a, b, subject.code)">
-            <template #default="scope">
-              <span v-if="scope.row.subjects[subject.code]">
-                {{ scope.row.subjects[subject.code].score }}
-              </span>
-              <span v-else class="no-score">-</span>
-            </template>
-          </el-table-column>
-          
-          <el-table-column 
-            :label="`${subject.name}排名`" 
-            width="90" 
-            align="center"
-            sortable
-            :sort-method="(a, b) => sortSubjectRank(a, b, subject.code)">
-            <template #default="scope">
-              <span 
-                v-if="scope.row.subjects[subject.code] && scope.row.subjects[subject.code].rank_in_class" 
-                class="rank-info">
-                第{{ scope.row.subjects[subject.code].rank_in_class }}名
-              </span>
-              <span v-else class="no-data">-</span>
-            </template>
-          </el-table-column>
-        </template>
-        
-        <!-- 总分列 -->
-        <el-table-column label="总分" width="100" align="center" fixed="right" sortable prop="total_score">
-          <template #default="scope">
-            <span class="total-score">{{ scope.row.total_score }}</span>
-          </template>
-        </el-table-column>
-        
-        <el-table-column 
-          label="总分排名" 
-          width="100" 
-          align="center" 
-          fixed="right"
-          sortable
-          :sort-method="sortTotalRank">
-          <template #default="scope">
-            <span v-if="scope.row.total_rank_in_grade" class="total-rank">
-              第{{ scope.row.total_rank_in_grade }}名
-            </span>
-            <span v-else class="no-data">-</span>
-          </template>
-        </el-table-column>
-      </el-table>
+        </el-auto-resizer>
+      </div>
 
       <!-- 分页组件 -->
       <div v-if="queryForm.exam_id && gradeList.length > 0" class="pagination-container">
@@ -201,19 +125,29 @@
             <el-option label="20 条/页" :value="20" />
             <el-option label="50 条/页" :value="50" />
             <el-option label="100 条/页" :value="100" />
+            <el-option label="200 条/页" :value="200" />
+            <el-option label="500 条/页" :value="500" />
+            <el-option label="全部数据" :value="0" />
           </el-select>
           <span class="total-info">
             共 {{ pagination.total }} 条数据
           </span>
         </div>
         
+        <!-- 标准分页组件 -->
         <el-pagination 
+          v-if="pagination.pageSize !== 0"
           background 
           layout="total, prev, pager, next, jumper" 
           :total="pagination.total"
           :page-size="pagination.pageSize"
           :current-page="pagination.page"
           @current-change="handleCurrentChange" />
+        
+        <!-- 显示全部时只显示总数 -->
+        <div v-else class="total-display">
+          共 {{ pagination.total }} 条数据 (显示全部)
+        </div>
       </div>
     </el-card>
 
@@ -315,8 +249,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ref, reactive, onMounted, computed, h } from 'vue'
+import { ElMessage, ElMessageBox, ElTag } from 'element-plus'
 import { 
   Search, 
   Refresh, 
@@ -374,6 +308,141 @@ const importForm = reactive({
   file: null
 })
 
+// 表格列配置
+const tableColumns = computed(() => {
+  const columns = [
+    // 学号列
+    {
+      key: 'school_id',
+      title: '学号',
+      width: 120,
+      align: 'center',
+      fixed: 'left',
+      cellRenderer: ({ rowData }) => {
+        return h('span', {
+          style: { color: '#409eff', fontWeight: '500' }
+        }, rowData.school_id || '')
+      }
+    },
+    
+    // 姓名列
+    {
+      key: 'name',
+      title: '姓名',
+      width: 100,
+      align: 'center',
+      fixed: 'left',
+      cellRenderer: ({ rowData }) => {
+        return h('span', {
+          style: { fontWeight: '600', color: '#303133' }
+        }, rowData.name || '')
+      }
+    },
+    
+    // 年级列
+    {
+      key: 'grade',
+      title: '年级',
+      width: 80,
+      align: 'center',
+      cellRenderer: ({ rowData }) => {
+        return h('span', {
+          style: { color: '#606266' }
+        }, rowData.grade || '未设置')
+      }
+    },
+    
+    // 班级列
+    {
+      key: 'class_name',
+      title: '班级',
+      width: 80,
+      align: 'center',
+      cellRenderer: ({ rowData }) => {
+        return h('span', {
+          style: { color: '#606266' }
+        }, rowData.class_name || '未设置')
+      }
+    }
+  ]
+  
+  // 动态添加科目列
+  subjectList.value.forEach(subject => {
+    // 科目分数列
+    columns.push({
+      key: `subject_${subject.code}_score`,
+      title: subject.name,
+      width: 100,
+      align: 'center',
+      cellRenderer: ({ rowData }) => {
+        const score = rowData.subjects?.[subject.code]?.score
+        if (score !== undefined && score !== null) {
+          return h('span', {
+            style: { fontWeight: '600', fontSize: '14px' }
+          }, score.toString())
+        }
+        return h('span', {
+          style: { color: '#c0c4cc', fontStyle: 'italic', fontSize: '12px' }
+        }, '-')
+      }
+    })
+    
+    // 科目排名列
+    columns.push({
+      key: `subject_${subject.code}_rank`,
+      title: `${subject.name}排名`,
+      width: 90,
+      align: 'center',
+      cellRenderer: ({ rowData }) => {
+        const rank = rowData.subjects?.[subject.code]?.rank_in_class
+        if (rank) {
+          return h('span', {
+            style: { color: '#606266', fontSize: '12px', fontWeight: '500' }
+          }, `第${rank}名`)
+        }
+        return h('span', {
+          style: { color: '#c0c4cc', fontStyle: 'italic', fontSize: '12px' }
+        }, '-')
+      }
+    })
+  })
+  
+  // 总分列
+  columns.push({
+    key: 'total_score',
+    title: '总分',
+    width: 100,
+    align: 'center',
+    fixed: 'right',
+    cellRenderer: ({ rowData }) => {
+      return h('span', {
+        style: { fontWeight: '600', color: '#303133' }
+      }, rowData.total_score?.toString() || '0')
+    }
+  })
+  
+  // 总分排名列
+  columns.push({
+    key: 'total_rank_in_grade',
+    title: '总分排名',
+    width: 100,
+    align: 'center',
+    fixed: 'right',
+    cellRenderer: ({ rowData }) => {
+      if (rowData.total_rank_in_grade) {
+        return h('span', {
+          style: { color: '#606266', fontWeight: '500', fontSize: '13px' }
+        }, `第${rowData.total_rank_in_grade}名`)
+      }
+      return h('span', {
+        style: { color: '#c0c4cc', fontStyle: 'italic', fontSize: '12px' }
+      }, '-')
+    }
+  })
+  
+  return columns
+})
+
 // 排序方法
 const sortSubjectScore = (a, b, subjectCode) => {
   const scoreA = a.subjects[subjectCode]?.score || 0
@@ -406,8 +475,8 @@ const searchGrades = async () => {
     
     const params = {
       exam_id: queryForm.exam_id,
-      page: pagination.page,
-      page_size: pagination.pageSize
+      page: pagination.pageSize === 0 ? 1 : pagination.page,
+      page_size: pagination.pageSize === 0 ? 999999 : pagination.pageSize
     }
     
     if (queryForm.grade) {
@@ -426,7 +495,10 @@ const searchGrades = async () => {
     if ((response.total || 0) === 0) {
       ElMessage.warning('没有找到符合条件的成绩记录')
     } else {
-      ElMessage.success(`查询完成，共找到 ${response.total} 名学生的成绩`)
+      const displayMsg = pagination.pageSize === 0 
+        ? `查询完成，共显示全部 ${response.total} 名学生的成绩`
+        : `查询完成，共找到 ${response.total} 名学生的成绩`
+      ElMessage.success(displayMsg)
     }
     
   } catch (error) {
@@ -738,12 +810,50 @@ onMounted(() => {
 }
 
 .page-size-select {
-  width: 120px;
+  width: 140px;
 }
 
 .total-info {
   color: #909399;
   font-size: 14px;
+}
+
+.total-display {
+  color: #606266;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* 虚拟滚动表格容器 */
+.virtual-table-container {
+  height: calc(70vh - 120px);
+  border: 1px solid #ebeef5;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+/* 虚拟滚动表格样式优化 */
+:deep(.el-table-v2__header) {
+  background-color: #fafafa;
+  font-weight: 600;
+}
+
+:deep(.el-table-v2__row) {
+  border-bottom: 1px solid #ebeef5;
+}
+
+:deep(.el-table-v2__row:hover) {
+  background-color: #f5f7fa;
+}
+
+/* 自定义滚动条样式 */
+:deep(.el-table-v2__scrollbar) {
+  width: 8px;
+}
+
+:deep(.el-table-v2__scrollbar-thumb) {
+  background-color: #c1c1c1;
+  border-radius: 4px;
 }
 
 /* 导入对话框样式 */
