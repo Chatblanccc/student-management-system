@@ -13,7 +13,7 @@
                 <el-dropdown @command="handleUserCommand">
                     <span style="color: white; cursor: pointer; display: flex; align-items: center;">
                         <el-icon style="margin-right: 5px;"><User /></el-icon>
-                        {{ (userStore.state.user?.first_name || '') + (userStore.state.user?.last_name || '') || '管理员' }}
+                        {{ (userStore.state.user?.first_name || '') + (userStore.state.user?.last_name || '') || userStore.state.user?.username || '管理员' }}
                         <el-icon style="margin-left: 5px;"><ArrowDown /></el-icon>
                     </span>
                     <template #dropdown>
@@ -85,6 +85,15 @@
                             <span>成绩分析</span>
                         </el-menu-item>
                     </el-sub-menu>
+
+                    <!-- 用户管理菜单 - 仅管理员可见 -->
+                    <el-menu-item 
+                        v-if="userStore.isAdmin()" 
+                        index="/manage/user_management" 
+                        style="border-bottom: 1px solid #ddd;">
+                        <el-icon><Setting /></el-icon>
+                        <span>用户管理</span>
+                    </el-menu-item>
                 </el-menu>
             </div>
             <!-- 侧边栏结束 -->
@@ -132,7 +141,8 @@ import {
     TrendCharts,
     DataAnalysis,
     ArrowDown,
-    SwitchButton
+    SwitchButton,
+    Setting
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/utils/userStore'
 
@@ -158,6 +168,7 @@ const routeTitleMap = {
     '/manage/transfer_data': '异动数据详情',
     '/manage/grade_query': '成绩查询',
     '/manage/grade_analysis': '成绩分析',
+    '/manage/user_management': '用户管理'
 }
 
 // 添加标签页
@@ -248,12 +259,9 @@ const handleUserCommand = async (command) => {
                 
                 // 清除用户状态
                 userStore.logout()
-                ElMessage.success('已退出登录')
                 router.push('/login')
-                
             } catch (error) {
                 // 用户取消退出
-                console.log('用户取消退出')
             }
             break
     }

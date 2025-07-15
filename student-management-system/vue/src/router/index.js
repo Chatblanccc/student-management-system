@@ -59,6 +59,12 @@ const router = createRouter({
           name: 'grade_analysis', 
           meta: { title: '成绩分析', requiresAuth: true }, 
           component: () => import('../views/GradeAnalysis.vue')
+        },
+        { 
+          path: 'user_management', 
+          name: 'user_management', 
+          meta: { title: '用户管理', requiresAuth: true, adminOnly: true }, 
+          component: () => import('../views/UserManagement.vue')
         }
       ] 
     }

@@ -43,6 +43,37 @@ const isTokenExpired = (token) => {
   }
 }
 
+// 设置用户权限
+const setPermissions = (userPermissions) => {
+  Object.assign(permissions, userPermissions)
+  console.log('🔐 权限已更新:', userPermissions)
+}
+
+// 检查权限的辅助函数
+const hasPermission = (permission) => {
+  return permissions[permission] || false
+}
+
+// 检查是否为管理员
+const isAdmin = () => {
+  return permissions.is_admin || state.user?.is_staff || state.user?.is_superuser || false
+}
+
+// 检查是否可以执行某个操作
+const canPerform = (action) => {
+  const actionMap = {
+    'add': 'can_add',
+    'edit': 'can_edit',
+    'delete': 'can_delete',
+    'import': 'can_import',
+    'export': 'can_export',
+    'view': 'can_view'
+  }
+  
+  const permissionKey = actionMap[action]
+  return permissionKey ? hasPermission(permissionKey) : false
+}
+
 // 从存储恢复状态
 const initializeStore = () => {
   console.log('🔄 初始化用户状态...')
@@ -78,6 +109,11 @@ const initializeStore = () => {
       state.token = token
       state.user = JSON.parse(user)
       state.isLoggedIn = true
+      
+      // 如果用户数据包含权限信息，设置权限
+      if (state.user.permissions) {
+        setPermissions(state.user.permissions)
+      }
       
       console.log('✅ 成功恢复登录状态:', state.user.username)
     } catch (error) {
@@ -127,6 +163,20 @@ const setToken = (token, rememberMe = false) => {
   }
 }
 
+// 清除权限信息
+const clearPermissions = () => {
+  Object.assign(permissions, {
+    can_view: false,
+    can_add: false,
+    can_edit: false,
+    can_delete: false,
+    can_import: false,
+    can_export: false,
+    is_admin: false,
+    user_role: 'user'
+  })
+}
+
 // 清除所有存储
 const clearAllStorage = () => {
   state.user = null
@@ -158,51 +208,6 @@ const checkLoginStatus = () => {
     return false
   }
   return state.isLoggedIn
-}
-
-// 设置用户权限
-const setPermissions = (userPermissions) => {
-  Object.assign(permissions, userPermissions)
-  console.log('🔐 权限已更新:', userPermissions)
-}
-
-// 检查权限的辅助函数
-const hasPermission = (permission) => {
-  return permissions[permission] || false
-}
-
-// 检查是否为管理员
-const isAdmin = () => {
-  return permissions.is_admin || false
-}
-
-// 检查是否可以执行某个操作
-const canPerform = (action) => {
-  const actionMap = {
-    'add': 'can_add',
-    'edit': 'can_edit',
-    'delete': 'can_delete',
-    'import': 'can_import',
-    'export': 'can_export',
-    'view': 'can_view'
-  }
-  
-  const permissionKey = actionMap[action]
-  return permissionKey ? hasPermission(permissionKey) : false
-}
-
-// 清除权限信息
-const clearPermissions = () => {
-  Object.assign(permissions, {
-    can_view: false,
-    can_add: false,
-    can_edit: false,
-    can_delete: false,
-    can_import: false,
-    can_export: false,
-    is_admin: false,
-    user_role: 'user'
-  })
 }
 
 // 导出store

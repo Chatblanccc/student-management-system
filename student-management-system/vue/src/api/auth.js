@@ -47,19 +47,19 @@ export const getUserInfo = () => {
   })
 }
 
+// 获取用户权限API
+export const getUserPermissions = () => {
+  return request({
+    url: '/student_data/auth/permissions/',
+    method: 'get'
+  })
+}
+
 // 刷新token API
 export const refreshToken = (refreshToken) => {
   return request({
     url: '/auth/refresh/',
     method: 'post',
     data: { refresh: refreshToken }
-  })
-} 
-
-// 获取用户权限API
-export const getUserPermissions = () => {
-  return request({
-    url: '/student_data/auth/permissions/',
-    method: 'get'
   })
 } 
