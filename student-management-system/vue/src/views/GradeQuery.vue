@@ -126,7 +126,7 @@
           </template>
         </el-table-column>
         
-        <el-table-column prop="class_name" label="班级" width="80" align="center">
+        <el-table-column prop="class_name" label="班级" width="80" align="center" sortable>
           <template #default="scope">
             <span v-if="scope.row.class_name">{{ scope.row.class_name }}</span>
             <span class="no-data" v-else>未设置</span>
@@ -135,7 +135,12 @@
         
         <!-- 动态生成科目列 -->
         <template v-for="subject in subjectList" :key="subject.code">
-          <el-table-column :label="subject.name" width="100" align="center">
+          <el-table-column 
+            :label="subject.name" 
+            width="100" 
+            align="center"
+            sortable
+            :sort-method="(a, b) => sortSubjectScore(a, b, subject.code)">
             <template #default="scope">
               <span v-if="scope.row.subjects[subject.code]">
                 {{ scope.row.subjects[subject.code].score }}
@@ -144,7 +149,12 @@
             </template>
           </el-table-column>
           
-          <el-table-column :label="`${subject.name}排名`" width="90" align="center">
+          <el-table-column 
+            :label="`${subject.name}排名`" 
+            width="90" 
+            align="center"
+            sortable
+            :sort-method="(a, b) => sortSubjectRank(a, b, subject.code)">
             <template #default="scope">
               <span 
                 v-if="scope.row.subjects[subject.code] && scope.row.subjects[subject.code].rank_in_class" 
@@ -157,13 +167,19 @@
         </template>
         
         <!-- 总分列 -->
-        <el-table-column label="总分" width="100" align="center" fixed="right">
+        <el-table-column label="总分" width="100" align="center" fixed="right" sortable prop="total_score">
           <template #default="scope">
             <span class="total-score">{{ scope.row.total_score }}</span>
           </template>
         </el-table-column>
         
-        <el-table-column label="总分排名" width="100" align="center" fixed="right">
+        <el-table-column 
+          label="总分排名" 
+          width="100" 
+          align="center" 
+          fixed="right"
+          sortable
+          :sort-method="sortTotalRank">
           <template #default="scope">
             <span v-if="scope.row.total_rank_in_grade" class="total-rank">
               第{{ scope.row.total_rank_in_grade }}名
@@ -357,6 +373,25 @@ const importForm = reactive({
   exam_id: '',
   file: null
 })
+
+// 排序方法
+const sortSubjectScore = (a, b, subjectCode) => {
+  const scoreA = a.subjects[subjectCode]?.score || 0
+  const scoreB = b.subjects[subjectCode]?.score || 0
+  return scoreB - scoreA // 降序排列，分数高的在前
+}
+
+const sortSubjectRank = (a, b, subjectCode) => {
+  const rankA = a.subjects[subjectCode]?.rank_in_class || Number.MAX_SAFE_INTEGER
+  const rankB = b.subjects[subjectCode]?.rank_in_class || Number.MAX_SAFE_INTEGER
+  return rankA - rankB // 升序排列，排名小的在前
+}
+
+const sortTotalRank = (a, b) => {
+  const rankA = a.total_rank_in_grade || Number.MAX_SAFE_INTEGER
+  const rankB = b.total_rank_in_grade || Number.MAX_SAFE_INTEGER
+  return rankA - rankB // 升序排列，排名小的在前
+}
 
 // 搜索成绩
 const searchGrades = async () => {
