@@ -1,123 +1,245 @@
 <template>
   <PermissionWrapper admin-only show-fallback fallback-message="仅管理员可访问用户管理">
     <div class="user-management">
-      <!-- 页面头部 -->
+      <!-- 美化后的页面头部 -->
       <div class="page-header">
-        <div class="header-left">
-          <h2 class="page-title">
-            <el-icon><UserFilled /></el-icon>
-            用户管理
-          </h2>
-          <p class="page-subtitle">管理系统用户账户和权限</p>
-        </div>
-        <div class="header-right">
-          <el-button type="primary" size="large" @click="showCreateDialog = true">
-            <el-icon><Plus /></el-icon>
-            创建用户
-          </el-button>
+        <div class="header-content">
+          <div class="header-left">
+            <div class="title-section">
+              <div class="icon-wrapper">
+                <el-icon class="page-icon"><UserFilled /></el-icon>
+              </div>
+              <div class="title-content">
+                <h1 class="page-title">用户管理</h1>
+                <p class="page-subtitle">管理系统用户账户和权限</p>
+              </div>
+            </div>
+          </div>
+          <div class="header-right">
+            <el-button type="primary" size="large" class="create-btn" @click="showCreateDialog = true">
+              <el-icon><Plus /></el-icon>
+              创建用户
+            </el-button>
+          </div>
         </div>
       </div>
 
-      <!-- 统计卡片 -->
-      <div class="stats-cards">
-        <el-row :gutter="20">
+      <!-- 美化后的统计卡片 -->
+      <div class="stats-section">
+        <el-row :gutter="24">
           <el-col :span="6">
-            <el-card class="stat-card">
-              <div class="stat-content">
-                <div class="stat-icon total">
+            <div class="stat-card total-users">
+              <div class="card-content">
+                <div class="stat-icon">
                   <el-icon><User /></el-icon>
                 </div>
-                <div class="stat-info">
+                <div class="stat-details">
                   <div class="stat-number">{{ users.length }}</div>
                   <div class="stat-label">总用户数</div>
                 </div>
+                <div class="card-bg-pattern"></div>
               </div>
-            </el-card>
+            </div>
           </el-col>
           <el-col :span="6">
-            <el-card class="stat-card">
-              <div class="stat-content">
-                <div class="stat-icon admin">
-                  <el-icon><Star /></el-icon>  <!-- 替换 Crown 为 Star -->
+            <div class="stat-card admin-users">
+              <div class="card-content">
+                <div class="stat-icon">
+                  <el-icon><Star /></el-icon>
                 </div>
-                <div class="stat-info">
+                <div class="stat-details">
                   <div class="stat-number">{{ adminCount }}</div>
                   <div class="stat-label">管理员</div>
                 </div>
+                <div class="card-bg-pattern"></div>
               </div>
-            </el-card>
+            </div>
           </el-col>
           <el-col :span="6">
-            <el-card class="stat-card">
-              <div class="stat-content">
-                <div class="stat-icon active">
+            <div class="stat-card active-users">
+              <div class="card-content">
+                <div class="stat-icon">
                   <el-icon><CircleCheck /></el-icon>
                 </div>
-                <div class="stat-info">
+                <div class="stat-details">
                   <div class="stat-number">{{ activeCount }}</div>
                   <div class="stat-label">活跃用户</div>
                 </div>
+                <div class="card-bg-pattern"></div>
               </div>
-            </el-card>
+            </div>
           </el-col>
           <el-col :span="6">
-            <el-card class="stat-card">
-              <div class="stat-content">
-                <div class="stat-icon inactive">
+            <div class="stat-card inactive-users">
+              <div class="card-content">
+                <div class="stat-icon">
                   <el-icon><CircleClose /></el-icon>
                 </div>
-                <div class="stat-info">
+                <div class="stat-details">
                   <div class="stat-number">{{ inactiveCount }}</div>
                   <div class="stat-label">禁用用户</div>
                 </div>
+                <div class="card-bg-pattern"></div>
               </div>
-            </el-card>
+            </div>
           </el-col>
         </el-row>
       </div>
 
-      <!-- 用户表格 -->
-      <el-card class="table-card" shadow="hover">
-        <div class="table-header">
-          <h3>用户列表</h3>
-          <div class="table-actions">
-            <el-input
-              v-model="searchKeyword"
-              placeholder="搜索用户名或邮箱"
-              style="width: 250px"
-              clearable>
-              <template #prefix>
-                <el-icon><Search /></el-icon>
-              </template>
-            </el-input>
+      <!-- 美化后的用户表格 -->
+      <div class="table-section">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">
+              <h3>用户列表</h3>
+              <span class="user-count">共 {{ filteredUsers.length }} 个用户</span>
+            </div>
+            <div class="table-controls">
+              <el-input
+                v-model="searchKeyword"
+                placeholder="搜索用户名或邮箱"
+                class="search-input"
+                clearable>
+                <template #prefix>
+                  <el-icon><Search /></el-icon>
+                </template>
+              </el-input>
+              <el-button class="refresh-btn" @click="loadUsers">
+                <el-icon><Refresh /></el-icon>
+              </el-button>
+            </div>
+          </div>
+          
+          <!-- 表格容器 -->
+          <div class="table-container" v-loading="loading">
+            <el-table 
+              :data="filteredUsers" 
+              stripe
+              class="modern-table"
+              :header-cell-style="{ 
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+                color: 'white', 
+                fontWeight: '600',
+                border: 'none'
+              }"
+              :row-style="{ height: '70px' }">
+              
+              <!-- 用户信息列 -->
+              <el-table-column label="用户" width="280" fixed="left">
+                <template #default="scope">
+                  <div class="user-cell">
+                    <div class="user-avatar-wrapper">
+                      <el-avatar 
+                        :size="50" 
+                        :src="scope.row.avatar" 
+                        class="user-avatar">
+                        <el-icon><User /></el-icon>
+                      </el-avatar>
+                      <div class="online-indicator" v-if="scope.row.is_active"></div>
+                    </div>
+                    <div class="user-info">
+                      <div class="user-name">{{ scope.row.username }}</div>
+                      <div class="user-email">{{ scope.row.email || '未设置邮箱' }}</div>
+                    </div>
+                  </div>
+                </template>
+              </el-table-column>
+              
+              <!-- 真实姓名列 -->
+              <el-table-column label="真实姓名" width="150">
+                <template #default="scope">
+                  <div class="real-name-cell">
+                    {{ (scope.row.first_name || '') + ' ' + (scope.row.last_name || '') || '未设置' }}
+                  </div>
+                </template>
+              </el-table-column>
+              
+              <!-- 角色列 -->
+              <el-table-column label="角色" width="140" align="center">
+                <template #default="scope">
+                  <el-tag 
+                    :class="['role-tag', getRoleClass(scope.row)]"
+                    effect="dark">
+                    <el-icon class="role-icon">
+                      <component :is="getRoleIcon(scope.row)" />
+                    </el-icon>
+                    {{ getUserRole(scope.row) }}
+                  </el-tag>
+                </template>
+              </el-table-column>
+              
+              <!-- 状态列 -->
+              <el-table-column label="状态" width="120" align="center">
+                <template #default="scope">
+                  <div class="status-cell">
+                    <div :class="['status-indicator', scope.row.is_active ? 'active' : 'inactive']">
+                      <el-icon>
+                        <component :is="scope.row.is_active ? 'CircleCheck' : 'CircleClose'" />
+                      </el-icon>
+                      {{ scope.row.is_active ? '活跃' : '禁用' }}
+                    </div>
+                  </div>
+                </template>
+              </el-table-column>
+              
+              <!-- 注册时间列 -->
+              <el-table-column label="注册时间" width="180" align="center">
+                <template #default="scope">
+                  <div class="date-cell">
+                    <el-icon class="date-icon"><Calendar /></el-icon>
+                    <span>{{ formatDate(scope.row.date_joined) }}</span>
+                  </div>
+                </template>
+              </el-table-column>
+              
+              <!-- 最后登录列 -->
+              <el-table-column label="最后登录" width="180" align="center">
+                <template #default="scope">
+                  <div class="date-cell" v-if="scope.row.last_login">
+                    <el-icon class="date-icon"><Clock /></el-icon>
+                    <span>{{ formatDate(scope.row.last_login) }}</span>
+                  </div>
+                  <el-tag v-else type="info" size="small" class="never-login">从未登录</el-tag>
+                </template>
+              </el-table-column>
+              
+              <!-- 操作列 -->
+              <el-table-column label="操作" width="200" fixed="right" align="center">
+                <template #default="scope">
+                  <div class="action-buttons">
+                    <el-button 
+                      type="primary" 
+                      size="small" 
+                      class="action-btn edit-btn"
+                      @click="editUser(scope.row)">
+                      <el-icon><Edit /></el-icon>
+                      编辑
+                    </el-button>
+                    <el-button 
+                      :type="scope.row.is_active ? 'danger' : 'success'"
+                      size="small" 
+                      class="action-btn toggle-btn"
+                      @click="toggleUserStatus(scope.row)"
+                      :disabled="scope.row.id === currentUserId">
+                      <el-icon>
+                        <component :is="scope.row.is_active ? 'Lock' : 'Unlock'" />
+                      </el-icon>
+                      {{ scope.row.is_active ? '禁用' : '启用' }}
+                    </el-button>
+                  </div>
+                </template>
+              </el-table-column>
+            </el-table>
           </div>
         </div>
-        
-        <!-- 优化后的表格容器 -->
-        <div class="virtual-table-container" v-loading="loading">
-          <el-auto-resizer>
-            <template #default="{ height, width }">
-              <el-table-v2
-                :columns="tableColumns"
-                :data="filteredUsers"
-                :width="width"
-                :height="height - 60"
-                :row-height="60"
-                :header-height="50"
-                fixed
-                @row-click="handleRowClick"
-              />
-            </template>
-          </el-auto-resizer>
-        </div>
-      </el-card>
+      </div>
       
       <!-- 创建/编辑用户对话框 -->
       <el-dialog 
         v-model="showCreateDialog" 
         :title="isEditing ? '编辑用户' : '创建用户'" 
-        width="600px"
-        class="user-dialog"
+        width="650px"
+        class="modern-dialog"
         @closed="resetForm">
         
         <el-form 
@@ -125,7 +247,7 @@
           :rules="formRules" 
           ref="formRef" 
           label-width="120px"
-          class="user-form">
+          class="modern-form">
           
           <div class="form-section">
             <h4 class="section-title">账户信息</h4>
@@ -255,7 +377,8 @@ import {
   Check,
   Avatar,  // 替换 Crown
   Key,     // 用于超级管理员
-  Tools    // 用于普通管理员
+  Tools,    // 用于普通管理员
+  Refresh
 } from '@element-plus/icons-vue'
 import PermissionWrapper from '@/components/PermissionWrapper.vue'
 import { getUserList, createUser, updateUser, toggleUserStatus as toggleStatus } from '@/api/user'
@@ -640,269 +763,458 @@ const handleRowClick = (rowData) => {
 onMounted(() => {
   loadUsers()
 })
+
+// 添加角色样式类方法
+const getRoleClass = (user) => {
+  if (user.is_superuser) return 'super-admin'
+  if (user.is_staff) return 'admin'
+  return 'user'
+}
 </script>
 
 <style scoped>
+/* 全局容器 */
 .user-management {
-  padding: 24px;
-  background: #f5f6fa;
   min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 24px;
 }
 
-/* 页面头部 */
+/* 页面头部美化 */
 .page-header {
+  margin-bottom: 32px;
+}
+
+.header-content {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 24px;
-  padding: 0 4px;
+  align-items: center;
+  background: white;
+  padding: 32px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
 }
 
-.header-left {
-  flex: 1;
-}
-
-.page-title {
+.title-section {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 0 0 8px 0;
-  font-size: 28px;
-  font-weight: 700;
-  color: #2c3e50;
+  gap: 20px;
 }
 
-.page-subtitle {
-  margin: 0;
-  color: #7f8c8d;
-  font-size: 16px;
-}
-
-/* 统计卡片 */
-.stats-cards {
-  margin-bottom: 24px;
-}
-
-.stat-card {
-  border: none;
-  border-radius: 12px;
-  transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-}
-
-.stat-content {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+.icon-wrapper {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.page-icon {
+  font-size: 28px;
   color: white;
 }
 
-.stat-icon.total { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-.stat-icon.admin { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-.stat-icon.active { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-.stat-icon.inactive { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+.page-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
-.stat-info {
-  flex: 1;
+.page-subtitle {
+  font-size: 16px;
+  color: #7f8c8d;
+  margin: 4px 0 0 0;
+}
+
+.create-btn {
+  height: 48px;
+  padding: 0 32px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+}
+
+.create-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+}
+
+/* 统计卡片美化 */
+.stats-section {
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  height: 140px;
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.stat-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.total-users {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.admin-users {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.active-users {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.inactive-users {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.card-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  height: 100%;
+  position: relative;
+  color: white;
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  backdrop-filter: blur(10px);
+}
+
+.stat-details {
+  text-align: right;
 }
 
 .stat-number {
-  font-size: 24px;
+  font-size: 36px;
   font-weight: 700;
-  color: #2c3e50;
   line-height: 1;
+  margin-bottom: 4px;
 }
 
 .stat-label {
   font-size: 14px;
-  color: #7f8c8d;
-  margin-top: 4px;
+  opacity: 0.9;
+  font-weight: 500;
 }
 
-/* 表格卡片 */
+.card-bg-pattern {
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  z-index: 0;
+}
+
+/* 表格区域美化 */
+.table-section {
+  margin-bottom: 32px;
+}
+
 .table-card {
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  border: none;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .table-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding: 0 4px;
+  padding: 24px 32px;
+  border-bottom: 1px solid #f0f0f0;
+  background: linear-gradient(135deg, #fafbfc 0%, #f8f9fa 100%);
 }
 
-.table-header h3 {
+.table-title h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2c3e50;
   margin: 0;
-  font-size: 20px;
+}
+
+.user-count {
+  font-size: 14px;
+  color: #7f8c8d;
+  margin-left: 12px;
+}
+
+.table-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.search-input {
+  width: 280px;
+}
+
+.search-input .el-input__wrapper {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.refresh-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  background: white;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.table-container {
+  padding: 0;
+}
+
+/* 表格样式美化 */
+.modern-table {
+  border: none;
+}
+
+.modern-table .el-table__row {
+  transition: all 0.3s ease;
+}
+
+.modern-table .el-table__row:hover {
+  background-color: rgba(102, 126, 234, 0.05) !important;
+  transform: scale(1.002);
+}
+
+/* 用户信息单元格 */
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.user-avatar-wrapper {
+  position: relative;
+}
+
+.user-avatar {
+  border: 3px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.online-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  background: #52c41a;
+  border: 2px solid white;
+  border-radius: 50%;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-name {
+  font-size: 16px;
   font-weight: 600;
   color: #2c3e50;
 }
 
-/* 用户表格 */
-.user-table {
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-/* 虚拟表格容器样式 */
-.virtual-table-container {
-  height: calc(100vh - 300px); /* 根据实际情况调整 */
-  width: 100%;
-  border: 1px solid #e4e7ed;
-  border-radius: 6px;
-}
-
-/* 用户信息样式 */
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.user-details {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.user-name {
-  font-weight: 600;
-  color: #303133;
-}
-
 .user-email {
-  font-size: 12px;
-  color: #909399;
+  font-size: 13px;
+  color: #7f8c8d;
 }
 
-/* 标签样式 */
-.role-tag, .status-tag {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.role-icon {
-  font-size: 12px;
-}
-
-/* 日期信息样式 */
-.date-info {
+/* 角色标签美化 */
+.role-tag {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #606266;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+}
+
+.role-tag.super-admin {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.role-tag.admin {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.role-tag.user {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+/* 状态指示器 */
+.status-cell {
+  display: flex;
+  justify-content: center;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status-indicator.active {
+  background: rgba(82, 196, 26, 0.1);
+  color: #52c41a;
+}
+
+.status-indicator.inactive {
+  background: rgba(255, 77, 79, 0.1);
+  color: #ff4d4f;
+}
+
+/* 日期单元格 */
+.date-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #666;
+  font-size: 13px;
 }
 
 .date-icon {
-  font-size: 14px;
-  color: #909399;
+  font-size: 16px;
+  color: #999;
 }
 
-/* 操作按钮样式 */
+.never-login {
+  border-radius: 8px;
+}
+
+/* 操作按钮美化 */
 .action-buttons {
   display: flex;
   gap: 8px;
   justify-content: center;
 }
 
-.action-buttons .el-button {
+.action-btn {
   display: flex;
   align-items: center;
   gap: 4px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
 }
 
-/* 对话框 */
-.user-dialog {
-  border-radius: 12px;
+.edit-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
 }
 
-.user-form {
-  padding: 0 8px;
+.edit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.form-section {
-  margin-bottom: 32px;
-}
-
-.section-title {
-  margin: 0 0 16px 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #2c3e50;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #ecf0f1;
-}
-
-.role-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.role-option small {
-  color: #7f8c8d;
-  font-size: 12px;
-  margin-top: 2px;
-}
-
-.dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding-top: 20px;
+.toggle-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* 响应式设计 */
+@media (max-width: 1200px) {
+  .stats-section .el-col {
+    margin-bottom: 16px;
+  }
+}
+
 @media (max-width: 768px) {
   .user-management {
     padding: 16px;
   }
   
-  .page-header {
+  .header-content {
     flex-direction: column;
-    align-items: flex-start;
+    gap: 20px;
+    padding: 24px;
+  }
+  
+  .table-header {
+    flex-direction: column;
     gap: 16px;
+    align-items: stretch;
   }
   
-  .header-right {
-    width: 100%;
-  }
-  
-  .stats-cards .el-col {
-    margin-bottom: 16px;
+  .table-controls {
+    justify-content: space-between;
   }
 }
 
-/* 深色模式适配 */
-.dark .page-title {
-  color: #ecf0f1;
+/* 动画效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.dark .user-name {
-  color: #ecf0f1;
+.stat-card, .table-card {
+  animation: fadeInUp 0.6s ease-out;
 }
 
-.dark .stat-number {
-  color: #ecf0f1;
-}
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3) { animation-delay: 0.3s; }
+.stat-card:nth-child(4) { animation-delay: 0.4s; }
 </style>
