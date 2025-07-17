@@ -205,7 +205,7 @@
                 </el-option>
                 <el-option label="超级管理员" value="superuser">
                   <div class="role-option">
-                    <el-icon><Crown /></el-icon>
+                    <el-icon><Avatar /></el-icon>
                     <span>超级管理员</span>
                     <small>拥有所有权限，包括用户管理</small>
                   </div>
@@ -253,7 +253,9 @@ import {
   Search,
   Message,
   Check,
-  Crown
+  Avatar,  // 替换 Crown
+  Key,     // 用于超级管理员
+  Tools    // 用于普通管理员
 } from '@element-plus/icons-vue'
 import PermissionWrapper from '@/components/PermissionWrapper.vue'
 import { getUserList, createUser, updateUser, toggleUserStatus as toggleStatus } from '@/api/user'
@@ -327,22 +329,37 @@ const formRules = {
   ]
 }
 
-const getUserRole = (user) => {
-  if (user.is_superuser) return '超级管理员'
-  if (user.is_staff) return '管理员'
-  return '普通用户'
-}
-
-const getRoleTagType = (user) => {
-  if (user.is_superuser) return 'danger'
-  if (user.is_staff) return 'warning'
-  return 'info'
-}
-
+// 修复角色图标函数
 const getRoleIcon = (user) => {
-  if (user.is_superuser) return 'Crown'
-  if (user.is_staff) return 'UserFilled'
-  return 'User'
+  if (user.is_superuser) {
+    return Key  // 超级管理员用钥匙图标
+  } else if (user.is_staff) {
+    return Tools  // 管理员用工具图标
+  } else {
+    return User  // 普通用户
+  }
+}
+
+// 修复角色标签类型
+const getRoleTagType = (user) => {
+  if (user.is_superuser) {
+    return 'danger'
+  } else if (user.is_staff) {
+    return 'warning'
+  } else {
+    return 'primary'
+  }
+}
+
+// 修复用户角色显示
+const getUserRole = (user) => {
+  if (user.is_superuser) {
+    return '超级管理员'
+  } else if (user.is_staff) {
+    return '管理员'
+  } else {
+    return '普通用户'
+  }
 }
 
 const formatDate = (dateString) => {
