@@ -773,448 +773,111 @@ const getRoleClass = (user) => {
 </script>
 
 <style scoped>
-/* 全局容器 */
+/* 调整整体布局尺寸 */
 .user-management {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  padding: 24px;
+  padding: 16px;
+  background: #f8fafc;
 }
 
-/* 页面头部美化 */
-.page-header {
-  margin-bottom: 32px;
-}
-
+/* 压缩头部区域 */
 .header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: white;
-  padding: 32px;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
+  padding: 20px 24px;
 }
-
-.title-section {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
 .icon-wrapper {
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-}
-
-.page-icon {
-  font-size: 28px;
-  color: white;
-}
-
-.page-title {
-  font-size: 32px;
-  font-weight: 700;
-  color: #2c3e50;
-  margin: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.page-subtitle {
-  font-size: 16px;
-  color: #7f8c8d;
-  margin: 4px 0 0 0;
-}
-
-.create-btn {
+  width: 48px;
   height: 48px;
-  padding: 0 32px;
-  font-size: 16px;
-  font-weight: 600;
   border-radius: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-  transition: all 0.3s ease;
 }
-
-.create-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
-}
-
-/* 统计卡片美化 */
-.stats-section {
-  margin-bottom: 32px;
-}
-
-.stat-card {
-  height: 140px;
-  border-radius: 20px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.stat-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-}
-
-.total-users {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.admin-users {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-.active-users {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-
-.inactive-users {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-}
-
-.card-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24px;
-  height: 100%;
-  position: relative;
-  color: white;
-}
-
-.stat-icon {
-  width: 60px;
-  height: 60px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  backdrop-filter: blur(10px);
-}
-
-.stat-details {
-  text-align: right;
-}
-
-.stat-number {
-  font-size: 36px;
-  font-weight: 700;
-  line-height: 1;
-  margin-bottom: 4px;
-}
-
-.stat-label {
-  font-size: 14px;
-  opacity: 0.9;
-  font-weight: 500;
-}
-
-.card-bg-pattern {
-  position: absolute;
-  top: -50px;
-  right: -50px;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  z-index: 0;
-}
-
-/* 表格区域美化 */
-.table-section {
-  margin-bottom: 32px;
-}
-
-.table-card {
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
-
-.table-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 24px 32px;
-  border-bottom: 1px solid #f0f0f0;
-  background: linear-gradient(135deg, #fafbfc 0%, #f8f9fa 100%);
-}
-
-.table-title h3 {
+.page-title {
   font-size: 24px;
-  font-weight: 700;
-  color: #2c3e50;
-  margin: 0;
 }
-
-.user-count {
+.page-subtitle {
   font-size: 14px;
-  color: #7f8c8d;
-  margin-left: 12px;
 }
 
-.table-controls {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.search-input {
-  width: 280px;
-}
-
-.search-input .el-input__wrapper {
+/* 缩小统计卡片 */
+.stat-card {
+  height: 120px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  font-size: 24px;
+}
+.stat-number {
+  font-size: 28px;
+}
+.stat-label {
+  font-size: 13px;
 }
 
-.refresh-btn {
+/* 紧凑表格样式 */
+.table-header {
+  padding: 16px 24px;
+}
+.table-title h3 {
+  font-size: 18px;
+}
+
+/* 调整表格列宽 */
+.modern-table {
+  width: 100% !important;
+}
+:deep(.el-table__row) {
+  height: 56px;
+}
+:deep(.el-table__cell) {
+  padding: 8px 0;
+}
+
+/* 压缩用户信息列 */
+.user-cell {
+  gap: 12px;
+}
+.user-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 12px;
-  border: 1px solid #e0e0e0;
-  background: white;
-  color: #666;
-  transition: all 0.3s ease;
 }
-
-.refresh-btn:hover {
-  background: #667eea;
-  color: white;
-  border-color: #667eea;
-}
-
-.table-container {
-  padding: 0;
-}
-
-/* 表格样式美化 */
-.modern-table {
-  border: none;
-}
-
-.modern-table .el-table__row {
-  transition: all 0.3s ease;
-}
-
-.modern-table .el-table__row:hover {
-  background-color: rgba(102, 126, 234, 0.05) !important;
-  transform: scale(1.002);
-}
-
-/* 用户信息单元格 */
-.user-cell {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 12px 0;
-}
-
-.user-avatar-wrapper {
-  position: relative;
-}
-
-.user-avatar {
-  border: 3px solid white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.online-indicator {
-  position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 14px;
-  height: 14px;
-  background: #52c41a;
-  border: 2px solid white;
-  border-radius: 50%;
-}
-
-.user-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
 .user-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #2c3e50;
+  font-size: 14px;
 }
-
 .user-email {
-  font-size: 13px;
-  color: #7f8c8d;
+  font-size: 12px;
 }
 
-/* 角色标签美化 */
-.role-tag {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-weight: 600;
-  border: none;
-}
-
-.role-tag.super-admin {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  color: white;
-}
-
-.role-tag.admin {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.role-tag.user {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  color: white;
-}
-
-/* 状态指示器 */
-.status-cell {
-  display: flex;
-  justify-content: center;
-}
-
-.status-indicator {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.status-indicator.active {
-  background: rgba(82, 196, 26, 0.1);
-  color: #52c41a;
-}
-
-.status-indicator.inactive {
-  background: rgba(255, 77, 79, 0.1);
-  color: #ff4d4f;
-}
-
-/* 日期单元格 */
-.date-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  color: #666;
-  font-size: 13px;
-}
-
-.date-icon {
-  font-size: 16px;
-  color: #999;
-}
-
-.never-login {
-  border-radius: 8px;
-}
-
-/* 操作按钮美化 */
-.action-buttons {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-}
-
+/* 调整操作按钮尺寸 */
 .action-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  border-radius: 8px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  border: none;
+  padding: 6px 12px;
+  font-size: 12px;
 }
 
-.edit-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+/* 紧凑对话框样式 */
+.modern-dialog {
+  --el-dialog-padding-primary: 20px;
+}
+.modern-form {
+  padding: 0 20px;
+}
+.form-section {
+  margin-bottom: 16px;
 }
 
-.edit-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.toggle-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-/* 响应式设计 */
-@media (max-width: 1200px) {
-  .stats-section .el-col {
-    margin-bottom: 16px;
-  }
-}
-
+/* 响应式调整 */
 @media (max-width: 768px) {
-  .user-management {
+  .header-content {
     padding: 16px;
   }
-  
-  .header-content {
-    flex-direction: column;
-    gap: 20px;
-    padding: 24px;
+  .stat-card {
+    height: 100px;
+    margin-bottom: 8px;
   }
-  
-  .table-header {
-    flex-direction: column;
-    gap: 16px;
-    align-items: stretch;
+  .stat-icon {
+    width: 40px;
+    height: 40px;
   }
-  
-  .table-controls {
-    justify-content: space-between;
+  .stat-number {
+    font-size: 24px;
   }
 }
-
-/* 动画效果 */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.stat-card, .table-card {
-  animation: fadeInUp 0.6s ease-out;
-}
-
-.stat-card:nth-child(1) { animation-delay: 0.1s; }
-.stat-card:nth-child(2) { animation-delay: 0.2s; }
-.stat-card:nth-child(3) { animation-delay: 0.3s; }
-.stat-card:nth-child(4) { animation-delay: 0.4s; }
 </style>
