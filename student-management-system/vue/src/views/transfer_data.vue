@@ -93,7 +93,7 @@
                             :columns="tableColumns"
                             :data="tableData"
                             :width="width"
-                            :height="height"
+                            :height="height - 60"
                             :row-height="70"
                             :header-height="45"
                             fixed
@@ -662,9 +662,10 @@ const formatDate = (dateString) => {
 .transfer-data-container {
     padding: 16px;
     background: #f8fafc;
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 /* 工具栏 */
@@ -674,6 +675,7 @@ const formatDate = (dateString) => {
     padding: 16px 20px;
     margin-bottom: 16px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
 }
 
 .toolbar-content {
@@ -701,6 +703,7 @@ const formatDate = (dateString) => {
     display: flex;
     gap: 12px;
     margin-bottom: 16px;
+    flex-shrink: 0;
 }
 
 .stat-card {
@@ -774,6 +777,7 @@ const formatDate = (dateString) => {
     flex: 1;
     display: flex;
     flex-direction: column;
+    min-height: 0;
 }
 
 .virtual-table-container {
@@ -789,6 +793,7 @@ const formatDate = (dateString) => {
     padding: 12px 20px;
     border-top: 1px solid #e5e7eb;
     background: #fafbfc;
+    flex-shrink: 0;
 }
 
 .page-size-selector {
