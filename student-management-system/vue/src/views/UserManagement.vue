@@ -93,118 +93,23 @@
           </div>
         </div>
         
-        <el-table 
-          :data="filteredUsers" 
-          v-loading="loading" 
-          stripe
-          class="user-table"
-          :header-cell-style="{ background: '#f8f9fa', color: '#495057', fontWeight: '600' }">
-          
-          <!-- 用户头像和基本信息 -->
-          <el-table-column label="用户" width="200" fixed="left">
-            <template #default="scope">
-              <div class="user-info">
-                <el-avatar 
-                  :size="40" 
-                  :src="scope.row.avatar" 
-                  class="user-avatar">
-                  <el-icon><User /></el-icon>
-                </el-avatar>
-                <div class="user-details">
-                  <div class="user-name">{{ scope.row.username }}</div>
-                  <div class="user-email">{{ scope.row.email || '未设置邮箱' }}</div>
-                </div>
-              </div>
+        <!-- 优化后的表格容器 -->
+        <div class="virtual-table-container" v-loading="loading">
+          <el-auto-resizer>
+            <template #default="{ height, width }">
+              <el-table-v2
+                :columns="tableColumns"
+                :data="filteredUsers"
+                :width="width"
+                :height="height - 60"
+                :row-height="60"
+                :header-height="50"
+                fixed
+                @row-click="handleRowClick"
+              />
             </template>
-          </el-table-column>
-          
-          <!-- 真实姓名 -->
-          <el-table-column label="真实姓名" width="120">
-            <template #default="scope">
-              <span class="real-name">
-                {{ (scope.row.first_name || '') + ' ' + (scope.row.last_name || '') || '未设置' }}
-              </span>
-            </template>
-          </el-table-column>
-          
-          <!-- 角色 -->
-          <el-table-column label="角色" width="120" align="center">
-            <template #default="scope">
-              <el-tag 
-                :type="getRoleTagType(scope.row)" 
-                effect="dark"
-                class="role-tag">
-                <el-icon class="role-icon">
-                  <component :is="getRoleIcon(scope.row)" />
-                </el-icon>
-                {{ getUserRole(scope.row) }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          
-          <!-- 状态 -->
-          <el-table-column label="状态" width="100" align="center">
-            <template #default="scope">
-              <el-tag 
-                :type="scope.row.is_active ? 'success' : 'danger'"
-                effect="dark"
-                class="status-tag">
-                <el-icon>
-                  <component :is="scope.row.is_active ? 'CircleCheck' : 'CircleClose'" />
-                </el-icon>
-                {{ scope.row.is_active ? '活跃' : '禁用' }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          
-          <!-- 注册时间 -->
-          <el-table-column label="注册时间" width="160" align="center">
-            <template #default="scope">
-              <div class="date-info">
-                <el-icon class="date-icon"><Calendar /></el-icon>
-                <span>{{ formatDate(scope.row.date_joined) }}</span>
-              </div>
-            </template>
-          </el-table-column>
-          
-          <!-- 最后登录 -->
-          <el-table-column label="最后登录" width="160" align="center">
-            <template #default="scope">
-              <div class="date-info" v-if="scope.row.last_login">
-                <el-icon class="date-icon"><Clock /></el-icon>
-                <span>{{ formatDate(scope.row.last_login) }}</span>
-              </div>
-              <el-tag v-else type="info" size="small">从未登录</el-tag>
-            </template>
-          </el-table-column>
-          
-          <!-- 操作 -->
-          <el-table-column label="操作" width="180" fixed="right" align="center">
-            <template #default="scope">
-              <div class="action-buttons">
-                <el-button 
-                  type="primary" 
-                  size="small" 
-                  plain
-                  @click="editUser(scope.row)">
-                  <el-icon><Edit /></el-icon>
-                  编辑
-                </el-button>
-                <el-button 
-                  :type="scope.row.is_active ? 'danger' : 'success'"
-                  size="small" 
-                  plain
-                  @click="toggleUserStatus(scope.row)"
-                  :disabled="scope.row.id === currentUserId">
-                  <el-icon>
-                    <component :is="scope.row.is_active ? 'Lock' : 'Unlock'" />
-                  </el-icon>
-                  {{ scope.row.is_active ? '禁用' : '启用' }}
-                </el-button>
-              </div>
-            </template>
-          </el-table-column>
-        </el-table>
+          </el-auto-resizer>
+        </div>
       </el-card>
       
       <!-- 创建/编辑用户对话框 -->
@@ -566,6 +471,156 @@ const resetForm = () => {
   }
 }
 
+// 表格列配置
+const tableColumns = ref([
+  {
+    key: 'user_info',
+    title: '用户',
+    dataKey: 'username',
+    width: 200,
+    fixed: 'left',
+    cellRenderer: ({ rowData }) => {
+      return h('div', { class: 'user-info' }, [
+        h('el-avatar', {
+          size: 40,
+          src: rowData.avatar,
+          class: 'user-avatar'
+        }, {
+          default: () => h('el-icon', {}, { default: () => h(User) })
+        }),
+        h('div', { class: 'user-details' }, [
+          h('div', { class: 'user-name' }, rowData.username),
+          h('div', { class: 'user-email' }, rowData.email || '未设置邮箱')
+        ])
+      ])
+    }
+  },
+  {
+    key: 'real_name',
+    title: '真实姓名',
+    dataKey: 'first_name',
+    width: 120,
+    cellRenderer: ({ rowData }) => {
+      const realName = (rowData.first_name || '') + ' ' + (rowData.last_name || '') || '未设置'
+      return h('span', { class: 'real-name' }, realName)
+    }
+  },
+  {
+    key: 'role',
+    title: '角色',
+    dataKey: 'is_superuser',
+    width: 120,
+    align: 'center',
+    cellRenderer: ({ rowData }) => {
+      return h('el-tag', {
+        type: getRoleTagType(rowData),
+        effect: 'dark',
+        class: 'role-tag'
+      }, {
+        default: () => [
+          h('el-icon', { class: 'role-icon' }, {
+            default: () => h(getRoleIcon(rowData))
+          }),
+          getUserRole(rowData)
+        ]
+      })
+    }
+  },
+  {
+    key: 'status',
+    title: '状态',
+    dataKey: 'is_active',
+    width: 100,
+    align: 'center',
+    cellRenderer: ({ rowData }) => {
+      return h('el-tag', {
+        type: rowData.is_active ? 'success' : 'danger',
+        effect: 'dark',
+        class: 'status-tag'
+      }, {
+        default: () => [
+          h('el-icon', {}, {
+            default: () => h(rowData.is_active ? CircleCheck : CircleClose)
+          }),
+          rowData.is_active ? '活跃' : '禁用'
+        ]
+      })
+    }
+  },
+  {
+    key: 'date_joined',
+    title: '注册时间',
+    dataKey: 'date_joined',
+    width: 160,
+    align: 'center',
+    cellRenderer: ({ rowData }) => {
+      return h('div', { class: 'date-info' }, [
+        h('el-icon', { class: 'date-icon' }, { default: () => h(Calendar) }),
+        h('span', {}, formatDate(rowData.date_joined))
+      ])
+    }
+  },
+  {
+    key: 'last_login',
+    title: '最后登录',
+    dataKey: 'last_login',
+    width: 160,
+    align: 'center',
+    cellRenderer: ({ rowData }) => {
+      if (rowData.last_login) {
+        return h('div', { class: 'date-info' }, [
+          h('el-icon', { class: 'date-icon' }, { default: () => h(Clock) }),
+          h('span', {}, formatDate(rowData.last_login))
+        ])
+      } else {
+        return h('el-tag', { type: 'info', size: 'small' }, '从未登录')
+      }
+    }
+  },
+  {
+    key: 'actions',
+    title: '操作',
+    width: 180,
+    fixed: 'right',
+    align: 'center',
+    cellRenderer: ({ rowData }) => {
+      return h('div', { class: 'action-buttons' }, [
+        h('el-button', {
+          type: 'primary',
+          size: 'small',
+          plain: true,
+          onClick: () => editUser(rowData)
+        }, {
+          default: () => [
+            h('el-icon', {}, { default: () => h(Edit) }),
+            '编辑'
+          ]
+        }),
+        h('el-button', {
+          type: rowData.is_active ? 'danger' : 'success',
+          size: 'small',
+          plain: true,
+          disabled: rowData.id === currentUserId.value,
+          onClick: () => toggleUserStatus(rowData)
+        }, {
+          default: () => [
+            h('el-icon', {}, {
+              default: () => h(rowData.is_active ? Lock : Unlock)
+            }),
+            rowData.is_active ? '禁用' : '启用'
+          ]
+        })
+      ])
+    }
+  }
+])
+
+// 处理行点击事件
+const handleRowClick = (rowData) => {
+  console.log('点击行:', rowData)
+  // 可以添加行点击逻辑
+}
+
 onMounted(() => {
   loadUsers()
 })
@@ -690,45 +745,39 @@ onMounted(() => {
   overflow: hidden;
 }
 
+/* 虚拟表格容器样式 */
+.virtual-table-container {
+  height: calc(100vh - 300px); /* 根据实际情况调整 */
+  width: 100%;
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+}
+
+/* 用户信息样式 */
 .user-info {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.user-avatar {
-  flex-shrink: 0;
-}
-
 .user-details {
-  flex: 1;
-  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .user-name {
   font-weight: 600;
-  color: #2c3e50;
-  font-size: 14px;
-  line-height: 1.2;
+  color: #303133;
 }
 
 .user-email {
-  color: #7f8c8d;
   font-size: 12px;
-  line-height: 1.2;
-  margin-top: 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: #909399;
 }
 
-.real-name {
-  color: #2c3e50;
-  font-weight: 500;
-}
-
+/* 标签样式 */
 .role-tag, .status-tag {
-  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -738,23 +787,30 @@ onMounted(() => {
   font-size: 12px;
 }
 
+/* 日期信息样式 */
 .date-info {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #7f8c8d;
-  font-size: 13px;
+  color: #606266;
 }
 
 .date-icon {
   font-size: 14px;
-  color: #bdc3c7;
+  color: #909399;
 }
 
+/* 操作按钮样式 */
 .action-buttons {
   display: flex;
   gap: 8px;
   justify-content: center;
+}
+
+.action-buttons .el-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* 对话框 */
