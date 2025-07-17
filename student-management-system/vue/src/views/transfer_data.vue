@@ -1,6 +1,6 @@
 <template>
     <div class="transfer-data-container">
-        <!-- 紧凑工具栏 -->
+        <!-- 工具栏 -->
         <div class="toolbar-card">
             <div class="toolbar-content">
                 <div class="search-controls">
@@ -12,7 +12,7 @@
                         clearable
                         class="search-input">
                         <template #prepend>
-                            <el-icon size="14"><Search /></el-icon>
+                            <el-icon size="16"><Search /></el-icon>
                         </template>
                     </el-input>
                     <el-select 
@@ -28,27 +28,27 @@
                         <el-option label="复学" value="resume" />
                     </el-select>
                     <el-button type="primary" size="default" @click="handleSearch" :loading="tableLoading">
-                        <el-icon size="14"><Search /></el-icon>
+                        <el-icon size="16"><Search /></el-icon>
                         查询
                     </el-button>
                     <el-button size="default" @click="handleReset">
-                        <el-icon size="14"><RefreshLeft /></el-icon>
+                        <el-icon size="16"><RefreshLeft /></el-icon>
                         重置
                     </el-button>
                 </div>
                 
                 <el-button type="success" size="default" @click="refreshData">
-                    <el-icon size="14"><Refresh /></el-icon>
+                    <el-icon size="16"><Refresh /></el-icon>
                     刷新数据
                 </el-button>
             </div>
         </div>
 
-        <!-- 紧凑统计信息 -->
+        <!-- 统计信息 -->
         <div class="stats-container">
             <div class="stat-card">
                 <div class="stat-icon">
-                    <el-icon size="18"><InfoFilled /></el-icon>
+                    <el-icon size="20"><InfoFilled /></el-icon>
                 </div>
                 <div class="stat-content">
                     <div class="stat-number">{{ stats.totalRecords }}</div>
@@ -57,7 +57,7 @@
             </div>
             <div class="stat-card transfer-in">
                 <div class="stat-icon">
-                    <el-icon size="18"><Right /></el-icon>
+                    <el-icon size="20"><Right /></el-icon>
                 </div>
                 <div class="stat-content">
                     <div class="stat-number">{{ stats.transferInCount }}</div>
@@ -66,7 +66,7 @@
             </div>
             <div class="stat-card transfer-out">
                 <div class="stat-icon">
-                    <el-icon size="18"><Back /></el-icon>
+                    <el-icon size="20"><Back /></el-icon>
                 </div>
                 <div class="stat-content">
                     <div class="stat-number">{{ stats.transferOutCount }}</div>
@@ -75,7 +75,7 @@
             </div>
             <div class="stat-card pending">
                 <div class="stat-icon">
-                    <el-icon size="18"><CloseBold /></el-icon>
+                    <el-icon size="20"><CloseBold /></el-icon>
                 </div>
                 <div class="stat-content">
                     <div class="stat-number">{{ stats.pendingCount }}</div>
@@ -84,7 +84,7 @@
             </div>
         </div>
 
-        <!-- 紧凑虚拟滚动表格 -->
+        <!-- 表格区域 -->
         <div class="table-card">
             <div class="virtual-table-container" v-loading="tableLoading">
                 <el-auto-resizer>
@@ -93,9 +93,9 @@
                             :columns="tableColumns"
                             :data="tableData"
                             :width="width"
-                            :height="height - 50"
-                            :row-height="60"
-                            :header-height="40"
+                            :height="height"
+                            :row-height="70"
+                            :header-height="45"
                             fixed
                             row-key="id"
                         />
@@ -103,14 +103,14 @@
                 </el-auto-resizer>
             </div>
 
-            <!-- 紧凑分页组件 -->
+            <!-- 分页组件 -->
             <div class="pagination-container">
                 <div class="page-size-selector">
                     <span class="page-size-label">每页显示</span>
                     <el-select 
                         v-model="pagination.pageSize" 
                         @change="handleSizeChange"
-                        size="small"
+                        size="default"
                         class="page-size-select">
                         <el-option label="10 条/页" :value="10" />
                         <el-option label="20 条/页" :value="20" />
@@ -129,7 +129,7 @@
                     :page-size="pagination.pageSize"
                     :current-page="pagination.currentPage"
                     @current-change="handlePageChange"
-                    size="small" />
+                    size="default" />
                 
                 <div v-else class="total-count">
                     共 {{ pagination.total }} 条数据
@@ -137,8 +137,8 @@
             </div>
         </div>
 
-        <!-- 紧凑详情弹窗 -->
-        <el-dialog v-model="detailVisible" title="转学记录详情" width="65%" align-center class="detail-dialog">
+        <!-- 详情弹窗 -->
+        <el-dialog v-model="detailVisible" title="转学记录详情" width="70%" align-center class="detail-dialog">
             <div v-if="currentRecord" class="detail-container">
                 
                 <!-- 学生基本信息 -->
@@ -146,17 +146,17 @@
                     title="学生信息" 
                     :column="3" 
                     border 
-                    size="small"
+                    size="default"
                     class="detail-descriptions">
                     <template #title>
                         <div class="descriptions-title">
-                            <el-icon color="#409eff" size="16"><User /></el-icon>
+                            <el-icon color="#409eff" size="18"><User /></el-icon>
                             <span>学生信息</span>
                         </div>
                     </template>
                     
                     <el-descriptions-item label="姓名">
-                        <el-tag type="primary" size="small">{{ currentRecord.student_name }}</el-tag>
+                        <el-tag type="primary" size="default">{{ currentRecord.student_name }}</el-tag>
                     </el-descriptions-item>
                     
                     <el-descriptions-item label="学号">
@@ -173,11 +173,11 @@
                     title="转学信息" 
                     :column="2" 
                     border 
-                    size="small"
+                    size="default"
                     class="detail-descriptions">
                     <template #title>
                         <div class="descriptions-title">
-                            <el-icon color="#67c23a" size="16"><Promotion /></el-icon>
+                            <el-icon color="#67c23a" size="18"><Promotion /></el-icon>
                             <span>转学信息</span>
                         </div>
                     </template>
@@ -185,7 +185,7 @@
                     <el-descriptions-item label="转学类型">
                         <el-tag 
                             :type="currentRecord.transfer_type === 'transfer_in' ? 'success' : 'warning'" 
-                            size="small">
+                            size="default">
                             {{ currentRecord.transfer_type_display }}
                         </el-tag>
                     </el-descriptions-item>
@@ -212,17 +212,17 @@
                     title="处理信息" 
                     :column="2" 
                     border 
-                    size="small"
+                    size="default"
                     class="detail-descriptions">
                     <template #title>
                         <div class="descriptions-title">
-                            <el-icon color="#e6a23c" size="16"><Operation /></el-icon>
+                            <el-icon color="#e6a23c" size="18"><Operation /></el-icon>
                             <span>处理信息</span>
                         </div>
                     </template>
                     
                     <el-descriptions-item label="处理状态">
-                        <el-tag :type="getStatusTagType(currentRecord.status)" size="small">
+                        <el-tag :type="getStatusTagType(currentRecord.status)" size="default">
                             {{ currentRecord.status_display }}
                         </el-tag>
                     </el-descriptions-item>
@@ -300,12 +300,12 @@ const tableColumns = computed(() => [
     {
         key: 'student_name',
         title: '学生姓名',
-        width: 100,
+        width: 110,
         align: 'center',
         fixed: 'left',
         cellRenderer: ({ rowData }) => {
             return h('span', {
-                style: { fontWeight: '500', color: '#303133', fontSize: '13px' }
+                style: { fontWeight: '500', color: '#303133', fontSize: '14px' }
             }, rowData.student_name || '')
         }
     },
@@ -314,11 +314,11 @@ const tableColumns = computed(() => [
     {
         key: 'student_school_id',
         title: '学号',
-        width: 110,
+        width: 120,
         align: 'center',
         cellRenderer: ({ rowData }) => {
             return h('span', {
-                style: { fontSize: '12px' }
+                style: { fontSize: '13px' }
             }, rowData.student_school_id || '')
         }
     },
@@ -327,11 +327,11 @@ const tableColumns = computed(() => [
     {
         key: 'student_grade',
         title: '年级',
-        width: 70,
+        width: 80,
         align: 'center',
         cellRenderer: ({ rowData }) => {
             return h('span', {
-                style: { fontSize: '12px' }
+                style: { fontSize: '13px' }
             }, rowData.student_grade || '')
         }
     },
@@ -340,11 +340,11 @@ const tableColumns = computed(() => [
     {
         key: 'student_class_name',
         title: '班级',
-        width: 70,
+        width: 80,
         align: 'center',
         cellRenderer: ({ rowData }) => {
             return h('span', {
-                style: { fontSize: '12px' }
+                style: { fontSize: '13px' }
             }, rowData.student_class_name || '')
         }
     },
@@ -353,12 +353,12 @@ const tableColumns = computed(() => [
     {
         key: 'transfer_type',
         title: '异动类型',
-        width: 90,
+        width: 100,
         align: 'center',
         cellRenderer: ({ rowData }) => {
             return h(ElTag, {
                 type: getTransferTypeTagType(rowData.transfer_type),
-                size: 'small'
+                size: 'default'
             }, () => rowData.transfer_type_display || '')
         }
     },
@@ -367,11 +367,11 @@ const tableColumns = computed(() => [
     {
         key: 'transfer_date',
         title: '异动日期',
-        width: 120,
+        width: 130,
         align: 'center',
         cellRenderer: ({ rowData }) => {
             return h('span', {
-                style: { fontSize: '12px' }
+                style: { fontSize: '13px' }
             }, rowData.transfer_date || '')
         }
     },
@@ -380,7 +380,7 @@ const tableColumns = computed(() => [
     {
         key: 'transfer_details',
         title: '异动详情',
-        width: 240,
+        width: 280,
         cellRenderer: ({ rowData }) => {
             return renderTransferDetails(rowData)
         }
@@ -390,15 +390,15 @@ const tableColumns = computed(() => [
     {
         key: 'transfer_reason',
         title: '异动原因',
-        width: 200,
+        width: 220,
         cellRenderer: ({ rowData }) => {
             return h('div', {
                 style: {
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
-                    padding: '0 6px',
-                    fontSize: '12px'
+                    padding: '0 8px',
+                    fontSize: '13px'
                 },
                 title: rowData.transfer_reason || ''
             }, rowData.transfer_reason || '')
@@ -409,12 +409,12 @@ const tableColumns = computed(() => [
     {
         key: 'status',
         title: '处理状态',
-        width: 90,
+        width: 100,
         align: 'center',
         cellRenderer: ({ rowData }) => {
             return h(ElTag, {
                 type: getStatusTagType(rowData.status),
-                size: 'small'
+                size: 'default'
             }, () => rowData.status_display || '')
         }
     },
@@ -423,11 +423,11 @@ const tableColumns = computed(() => [
     {
         key: 'processor',
         title: '处理人',
-        width: 90,
+        width: 100,
         align: 'center',
         cellRenderer: ({ rowData }) => {
             return h('span', {
-                style: { fontSize: '12px' }
+                style: { fontSize: '13px' }
             }, rowData.processor || '')
         }
     },
@@ -436,11 +436,11 @@ const tableColumns = computed(() => [
     {
         key: 'process_time',
         title: '处理时间',
-        width: 140,
+        width: 160,
         align: 'center',
         cellRenderer: ({ rowData }) => {
             return h('span', {
-                style: { fontSize: '11px' }
+                style: { fontSize: '12px' }
             }, formatDate(rowData.process_time))
         }
     },
@@ -449,7 +449,7 @@ const tableColumns = computed(() => [
     {
         key: 'actions',
         title: '操作',
-        width: 70,
+        width: 80,
         align: 'center',
         fixed: 'right',
         cellRenderer: ({ rowData }) => {
@@ -459,7 +459,7 @@ const tableColumns = computed(() => [
                 h(ElButton, {
                     icon: View,
                     circle: true,
-                    size: 'small',
+                    size: 'default',
                     onClick: () => handleViewDetail(rowData)
                 })
             ])
@@ -476,7 +476,7 @@ const renderTransferDetails = (rowData) => {
             h('div', {
                 class: 'transfer-direction'
             }, [
-                h(ElIcon, { color: iconColor, size: 14 }, () => h(iconName)),
+                h(ElIcon, { color: iconColor, size: 16 }, () => h(iconName)),
                 h('span', { class: 'direction-text' }, directionText)
             ]),
             ...details.map(detail => 
@@ -660,17 +660,19 @@ const formatDate = (dateString) => {
 <style scoped>
 /* 整体容器 */
 .transfer-data-container {
-    padding: 12px;
+    padding: 16px;
     background: #f8fafc;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 /* 工具栏 */
 .toolbar-card {
     background: white;
     border-radius: 8px;
-    padding: 12px 16px;
-    margin-bottom: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -683,32 +685,32 @@ const formatDate = (dateString) => {
 .search-controls {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
 }
 
 .search-input {
-    width: 220px;
+    width: 240px;
 }
 
 .type-select {
-    width: 100px;
+    width: 120px;
 }
 
-/* 紧凑统计卡片 */
+/* 统计卡片 */
 .stats-container {
     display: flex;
-    gap: 10px;
-    margin-bottom: 12px;
+    gap: 12px;
+    margin-bottom: 16px;
 }
 
 .stat-card {
     flex: 1;
     background: white;
     border-radius: 8px;
-    padding: 12px;
+    padding: 16px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease;
     cursor: pointer;
@@ -720,9 +722,9 @@ const formatDate = (dateString) => {
 }
 
 .stat-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -751,16 +753,16 @@ const formatDate = (dateString) => {
 }
 
 .stat-number {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
     color: #1f2937;
     line-height: 1;
 }
 
 .stat-label {
-    font-size: 11px;
+    font-size: 13px;
     color: #6b7280;
-    margin-top: 2px;
+    margin-top: 4px;
 }
 
 /* 表格卡片 */
@@ -769,12 +771,14 @@ const formatDate = (dateString) => {
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .virtual-table-container {
-    height: calc(75vh - 100px);
-    border: 1px solid #e5e7eb;
-    border-radius: 6px 6px 0 0;
+    flex: 1;
+    min-height: 0;
 }
 
 /* 分页容器 */
@@ -782,7 +786,7 @@ const formatDate = (dateString) => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 16px;
+    padding: 12px 20px;
     border-top: 1px solid #e5e7eb;
     background: #fafbfc;
 }
@@ -794,29 +798,29 @@ const formatDate = (dateString) => {
 }
 
 .page-size-label {
-    font-size: 12px;
+    font-size: 13px;
     color: #6b7280;
 }
 
 .page-size-select {
-    width: 90px;
+    width: 100px;
 }
 
 .total-count {
     color: #6b7280;
-    font-size: 12px;
+    font-size: 13px;
 }
 
 /* 虚拟滚动表格样式优化 */
 :deep(.el-table-v2__header) {
     background-color: #f8fafc;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 13px;
 }
 
 :deep(.el-table-v2__row) {
     border-bottom: 1px solid #f3f4f6;
-    font-size: 12px;
+    font-size: 13px;
 }
 
 :deep(.el-table-v2__row:hover) {
@@ -824,40 +828,40 @@ const formatDate = (dateString) => {
 }
 
 :deep(.el-table-v2__cell) {
-    padding: 6px 8px;
+    padding: 8px 10px;
 }
 
 /* 异动详情样式 */
 .school-transfer-info {
-    font-size: 11px;
-    line-height: 1.3;
-    padding: 3px;
+    font-size: 12px;
+    line-height: 1.4;
+    padding: 4px;
 }
 
 .transfer-direction {
     display: flex;
     align-items: center;
-    margin-bottom: 3px;
+    margin-bottom: 4px;
     font-weight: 600;
 }
 
 .direction-text {
-    margin-left: 3px;
-    font-size: 10px;
+    margin-left: 4px;
+    font-size: 11px;
 }
 
 .school-name {
-    margin-bottom: 1px;
+    margin-bottom: 2px;
 }
 
 .school-name .label {
     color: #9ca3af;
-    font-size: 10px;
+    font-size: 11px;
 }
 
 .school-name .value {
     color: #374151;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
 }
 
@@ -868,15 +872,15 @@ const formatDate = (dateString) => {
 
 /* 详情弹窗 */
 .detail-dialog {
-    --el-dialog-padding-primary: 16px;
+    --el-dialog-padding-primary: 20px;
 }
 
 :deep(.el-dialog__header) {
-    padding: 16px 16px 8px;
+    padding: 20px 20px 10px;
 }
 
 :deep(.el-dialog__body) {
-    padding: 8px 16px 16px;
+    padding: 10px 20px 20px;
 }
 
 .detail-container {
@@ -884,42 +888,42 @@ const formatDate = (dateString) => {
 }
 
 .detail-descriptions {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
 .descriptions-title {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 14px;
+    gap: 8px;
+    font-size: 16px;
     font-weight: 600;
     color: #1f2937;
 }
 
 .info-text {
     color: #374151;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 :deep(.el-descriptions__title) {
-    margin-bottom: 12px !important;
-    font-size: 14px !important;
+    margin-bottom: 16px !important;
+    font-size: 16px !important;
     font-weight: 600 !important;
 }
 
 :deep(.el-descriptions__label) {
     font-weight: 600 !important;
     color: #6b7280 !important;
-    font-size: 12px !important;
+    font-size: 13px !important;
 }
 
 :deep(.el-descriptions__content) {
     color: #374151 !important;
-    font-size: 13px !important;
+    font-size: 14px !important;
 }
 
 :deep(.el-descriptions__table .el-descriptions__cell) {
-    padding: 8px 12px !important;
+    padding: 10px 16px !important;
 }
 
 .dialog-footer {
@@ -929,8 +933,8 @@ const formatDate = (dateString) => {
 
 /* 响应式设计 */
 @media (max-width: 1200px) {
-    .virtual-table-container {
-        height: calc(70vh - 80px);
+    .transfer-data-container {
+        padding: 12px;
     }
 }
 
@@ -941,7 +945,7 @@ const formatDate = (dateString) => {
     
     .toolbar-content {
         flex-direction: column;
-        gap: 8px;
+        gap: 12px;
         align-items: stretch;
     }
     
@@ -958,40 +962,36 @@ const formatDate = (dateString) => {
     
     .stats-container {
         flex-direction: column;
-        gap: 6px;
+        gap: 8px;
     }
     
     .stat-card {
-        padding: 8px;
+        padding: 12px;
     }
     
     .stat-icon {
-        width: 28px;
-        height: 28px;
+        width: 36px;
+        height: 36px;
     }
     
     .stat-number {
-        font-size: 16px;
+        font-size: 18px;
     }
     
     .pagination-container {
         flex-direction: column;
-        gap: 8px;
+        gap: 12px;
         align-items: stretch;
     }
 }
 
 @media (max-width: 480px) {
-    .virtual-table-container {
-        height: calc(65vh - 60px);
-    }
-    
     .search-controls {
-        gap: 4px;
+        gap: 8px;
     }
     
     .type-select {
-        width: 80px;
+        width: 100px;
     }
 }
 </style>
