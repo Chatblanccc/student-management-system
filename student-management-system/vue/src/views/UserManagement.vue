@@ -236,7 +236,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, h } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
   Plus, 
@@ -252,11 +252,13 @@ import {
   Clock,
   Search,
   Message,
-  Check
+  Check,
+  Crown
 } from '@element-plus/icons-vue'
 import PermissionWrapper from '@/components/PermissionWrapper.vue'
 import { getUserList, createUser, updateUser, toggleUserStatus as toggleStatus } from '@/api/user'
 import { useUserStore } from '@/utils/userStore'
+import axios from 'axios' // 引入axios
 
 const userStore = useUserStore()
 const currentUserId = computed(() => userStore.state.user?.id)
@@ -476,20 +478,17 @@ const tableColumns = ref([
   {
     key: 'user_info',
     title: '用户',
-    dataKey: 'username',
     width: 200,
     fixed: 'left',
     cellRenderer: ({ rowData }) => {
       return h('div', { class: 'user-info' }, [
         h('el-avatar', {
           size: 40,
-          src: rowData.avatar,
+          src: rowData.avatar || '', // 添加默认值
           class: 'user-avatar'
-        }, {
-          default: () => h('el-icon', {}, { default: () => h(User) })
-        }),
+        }, rowData.avatar ? null : h('el-icon', null, h(User))),
         h('div', { class: 'user-details' }, [
-          h('div', { class: 'user-name' }, rowData.username),
+          h('div', { class: 'user-name' }, rowData.username || '未知用户'),
           h('div', { class: 'user-email' }, rowData.email || '未设置邮箱')
         ])
       ])
